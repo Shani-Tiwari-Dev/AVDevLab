@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Trash</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ versioned_static('theme.css') }}">
+</head>
+<body class="admin-shell">
+    <div class="container" style="max-width: 900px;">
+        {% set active = 'trash' %}
+        {% include '_admin_nav.html' %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} rounded-4">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="bi bi-trash3"></i> Trash Bin ({{ trashed|length }})</h5>
+            {% if trashed %}
+            <form action="{{ url_for('admin_trash_clear') }}" method="POST" onsubmit="return confirm('Permanently delete ALL items in trash? This cannot be undone.');">
+                <button type="submit" class="btn btn-danger btn-custom"><i class="bi bi-trash3-fill"></i> Clear All Trash</button>
+            </form>
+            {% endif %}
+        </div>
+
+        {% for o in trashed %}
+        <div class="order-card" style="border-left-color:#dc2626;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold"><i class="bi bi-person-circle"></i> {{ o.name }}</span>
+                <span class="text-muted small">Removed: {{ o.deleted_date }}</span>
+            </div>
+            <div class="text-muted small mb-3">
+                <i class="bi bi-telephone"></i> {{ o.contact_number }} |
+                <i class="bi bi-envelope"></i> {{ o.gmail }} |
+                <i class="bi bi-clock"></i> {{ o.date }}
+            </div>
+            <div class="bg-light p-3 rounded-4">
+                <span class="category-pill">{{ o.category }}</span>
+                {% if o.special_instructions %}
+                <div class="small mt-2"><strong>Special Instructions:</strong> {{ o.special_instructions }}</div>
+                {% endif %}
+            </div>
+            <form action="{{ url_for('admin_trash_restore', order_id=o._id) }}" method="POST" class="mt-3">
+                <button type="submit" class="btn btn-outline-dark btn-custom"><i class="bi bi-arrow-counterclockwise"></i> Restore</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted glass-card">
+            <i class="bi bi-trash fs-1"></i>
+            <h5 class="mt-3">Trash bin is empty.</h5>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

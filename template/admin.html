@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AV DevLabs</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ versioned_static('theme.css') }}">
+</head>
+<body>
+    <div class="admin-shell">
+    <div class="container" style="max-width: 900px;">
+
+        {% set active = 'queries' %}
+        {% include '_admin_nav.html' %}
+
+        <!-- Stats -->
+        <div class="row mb-4 g-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-card" style="background: #eef2ff; color: #4338ca;">
+                    <div class="stat-num">{{ stats.total }}</div><small>Total Queries</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card" style="background: #fef3c7; color: #92400e;">
+                    <div class="stat-num">{{ stats.pending }}</div><small>Pending</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card" style="background: #dcfce7; color: #15803d;">
+                    <div class="stat-num">{{ stats.available }}</div><small>Available</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card" style="background: #fee2e2; color: #b91c1c;">
+                    <div class="stat-num">{{ stats.non_available }}</div><small>N/A</small>
+                </div>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} rounded-4">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Search by name -->
+        <form method="GET" action="{{ url_for('admin') }}" class="search-bar-wrap mb-4">
+            <i class="bi bi-search"></i>
+            <input type="text" name="q" value="{{ search_q }}" class="search-bar-input" placeholder="Search queries by name...">
+            {% if search_q %}
+            <a href="{{ url_for('admin') }}" class="search-clear"><i class="bi bi-x-circle"></i></a>
+            {% endif %}
+            <button type="submit" class="search-bar-btn">Search</button>
+        </form>
+
+        <!-- Queries -->
+        {% for query in queries %}
+        <div class="query-card status-{{ query.status }}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill"><i class="bi bi-envelope"></i> {{ query.gmail }}</span>
+                <span class="fw-bold
+                    {% if query.status == 'Pending' %}text-amber
+                    {% elif query.status == 'Available' %}text-success
+                    {% else %}text-danger{% endif %}">
+                    ● {{ query.status }}
+                </span>
+            </div>
+
+            <h5 class="fw-bold">{{ query.query }}</h5>
+
+            <div class="text-muted small mb-3">
+                <i class="bi bi-person"></i> <strong>{{ query.name }}</strong> |
+                <i class="bi bi-clock"></i> {{ query.date }}
+            </div>
+
+            <form action="/update_status/{{ query._id }}" method="POST" class="bg-light p-3 rounded-4 mt-3">
+                <div class="mb-2">
+                    <label class="small fw-bold text-muted">Admin Note / Message:</label>
+                    <input type="text" name="admin_message" class="form-control rounded-3 border-0 shadow-sm" placeholder="Type custom reply..." value="{{ query.admin_message }}">
+                </div>
+                <div class="d-flex gap-2">
+                    <select name="status" class="form-select w-auto rounded-3 shadow-sm border-0 fw-bold">
+                        <option value="Pending" {% if query.status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Available" {% if query.status == 'Available' %}selected{% endif %}>Available</option>
+                        <option value="Non-Available" {% if query.status == 'Non-Available' %}selected{% endif %}>Non-Available</option>
+                    </select>
+                    <button type="submit" class="btn btn-dark btn-custom shadow-sm">Save</button>
+
+                    {% set mail_subject = "Regarding your inquiry" %}
+                    {% set mail_body = "Hello " ~ query.name ~ ",%0D%0A%0D%0ARegarding your query: '" ~ query.query ~ "'%0D%0A%0D%0A" %}
+                    {% if query.admin_message %}
+                        {% set mail_body = mail_body ~ query.admin_message %}
+                    {% else %}
+                        {% set mail_body = mail_body ~ "Status: " ~ query.status %}
+                    {% endif %}
+
+                    <a href="mailto:{{ query.gmail }}?subject={{ mail_subject | urlencode }}&body={{ mail_body }}" class="btn btn-success btn-custom shadow-sm ms-auto">
+                        <i class="bi bi-envelope-fill"></i> Reply by Email
+                    </a>
+                </div>
+            </form>
+            <form action="{{ url_for('delete_query', query_id=query._id) }}" method="POST" class="mt-2"
+                  onsubmit="return confirm('Delete this query permanently?');">
+                <button type="submit" class="btn btn-outline-danger btn-custom btn-sm w-100">
+                    <i class="bi bi-trash3"></i> Delete Query
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted glass-card">
+            <i class="bi bi-inbox fs-1"></i>
+            <h5 class="mt-3">No inquiries found yet.</h5>
+        </div>
+        {% endfor %}
+    </div>
+    </div>
+</body>
+</html>

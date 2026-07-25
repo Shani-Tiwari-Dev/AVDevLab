@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AV DevLabs — Websites, Apps, ERP &amp; AI Agents</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ versioned_static('theme.css') }}">
+</head>
+<body>
+
+<div class="site-shell">
+    {% set active = 'home' %}
+    {% include '_user_nav.html' %}
+
+    <!-- ============ HERO ============ -->
+    <div class="hero-section hero-modern">
+        <div class="hero-copy">
+            <div class="hero-badge"><i class="bi bi-cpu"></i> Custom Software &amp; AI Solutions</div>
+            <div class="hero-title">
+                We build the<br>tech that<br><span class="hero-highlight">powers you.</span>
+            </div>
+            <div class="hero-desc">From sleek websites and mobile apps to ERP systems and AI Agents &mdash; AV DevLabs turns your idea into a working product. Tell us what you need, and let's build it together.</div>
+            <div class="hero-cta-row">
+                <a href="#placeOrderForm" class="btn-hero-primary"><i class="bi bi-rocket-takeoff-fill"></i> Place an Order</a>
+                <a href="#servicesSection" class="btn-hero-secondary"><i class="bi bi-grid-fill"></i> Our Services</a>
+            </div>
+        </div>
+        <div class="hero-illustration">
+            <svg viewBox="0 0 600 580" xmlns="http://www.w3.org/2000/svg">
+  <!-- soft sky glow behind Garuda -->
+  <g stroke="#1C2118" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#FFFCF3" opacity="0.9">
+    <ellipse cx="88" cy="56" rx="30" ry="14"/>
+    <ellipse cx="114" cy="49" rx="20" ry="11"/>
+    <ellipse cx="504" cy="72" rx="28" ry="13"/>
+    <ellipse cx="528" cy="66" rx="18" ry="10"/>
+  </g>
+
+  <!-- ground -->
+  <path d="M0 580 L0 500 L600 500 L600 580 Z" fill="#FEE588"/>
+  <path d="M0 580 L0 530 L600 530 L600 580 Z" fill="#FCD34D" opacity="0.55"/>
+
+  <!-- radiant sunburst behind Garuda -->
+  <g stroke="#1C2118" stroke-width="3" opacity="0.55">
+    <line x1="300" y1="330" x2="300" y2="60"/>
+    <line x1="300" y1="330" x2="120" y2="130"/>
+    <line x1="300" y1="330" x2="480" y2="130"/>
+    <line x1="300" y1="330" x2="80" y2="260"/>
+    <line x1="300" y1="330" x2="520" y2="260"/>
+    <line x1="300" y1="330" x2="170" y2="70"/>
+    <line x1="300" y1="330" x2="430" y2="70"/>
+  </g>
+  <circle cx="300" cy="330" r="205" fill="#FBC02D" opacity="0.28"/>
+  <circle cx="300" cy="330" r="150" fill="#FFF3C4" opacity="0.55"/>
+
+  <!-- Garuda: wings spread -->
+  <g stroke="#1C2118" stroke-width="4" stroke-linejoin="round">
+    <path d="M300 300 C 210 260, 110 280, 55 210 C 120 230, 170 220, 205 240 C 150 205, 105 195, 70 150 C 140 165, 190 190, 225 225 C 205 180, 190 150, 175 105 C 220 145, 250 195, 268 250 Z" fill="#FBC02D"/>
+    <path d="M300 300 C 390 260, 490 280, 545 210 C 480 230, 430 220, 395 240 C 450 205, 495 195, 530 150 C 460 165, 410 190, 375 225 C 395 180, 410 150, 425 105 C 380 145, 350 195, 332 250 Z" fill="#FBC02D"/>
+  </g>
+
+  <!-- crown/headdress -->
+  <g stroke="#1C2118" stroke-width="3.5" stroke-linejoin="round">
+    <path d="M270 170 L300 110 L330 170 Z" fill="#F5B800"/>
+    <rect x="280" y="160" width="40" height="18" rx="6" fill="#FCD34D"/>
+    <circle cx="300" cy="108" r="8" fill="#FEE588"/>
+  </g>
+
+  <!-- head + torso (seated, folded-hands pose like the mark) -->
+  <g stroke="#1C2118" stroke-width="4" stroke-linejoin="round">
+    <circle cx="300" cy="215" r="34" fill="#FCD34D"/>
+    <path d="M300 246 C 270 250, 250 280, 248 320 L 352 320 C 350 280, 330 250, 300 246 Z" fill="#F5B800"/>
+    <path d="M262 300 C 250 330, 250 365, 270 390 L 330 390 C 350 365, 350 330, 338 300 Z" fill="#FBC02D"/>
+    <!-- folded hands -->
+    <ellipse cx="300" cy="335" rx="20" ry="14" fill="#FEE588"/>
+  </g>
+
+  <!-- legs, seated cross-legged -->
+  <g stroke="#1C2118" stroke-width="4" stroke-linejoin="round">
+    <path d="M265 388 C 235 400, 215 415, 220 435 L 300 435 L 300 400 Z" fill="#F5B800"/>
+    <path d="M335 388 C 365 400, 385 415, 380 435 L 300 435 L 300 400 Z" fill="#F5B800"/>
+  </g>
+
+  <!-- decorative sash / necklace -->
+  <g stroke="#1C2118" stroke-width="2.5">
+    <path d="M275 260 Q300 275 325 260" fill="none"/>
+    <circle cx="300" cy="278" r="5" fill="#FFF3C4"/>
+  </g>
+</svg>
+        </div>
+    </div>
+
+    <!-- ============ ANNOUNCEMENTS (circular story-style cards) ============ -->
+    <div class="announce-section">
+        <div class="section-shell tight" style="padding-bottom: 6px;">
+            <div class="section-eyebrow">What's New</div>
+            <div class="section-title" style="font-size:1.3rem;"><i class="bi bi-megaphone-fill text-amber"></i> Announcements</div>
+        </div>
+
+        {% if announcements %}
+        <div class="announce-scroll">
+            {% for a in announcements %}
+            <button type="button" class="announce-bubble" onclick="openAnnouncement('{{ a.title | e }}', '{{ a.message | e }}', '{{ a.icon or 'bi-megaphone-fill' }}', '{{ a.color or 'amber' }}', '{{ a.date | e }}')">
+                <div class="announce-ring">
+                    <div class="announce-ring-inner color-{{ a.color or 'amber' }}">
+                        <i class="bi {{ a.icon or 'bi-megaphone-fill' }}"></i>
+                    </div>
+                </div>
+                <small>{{ a.title }}</small>
+            </button>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="announce-empty">No announcements right now — check back soon!</div>
+        {% endif %}
+    </div>
+
+    <!-- Announcement detail modal -->
+    <div class="announce-modal-backdrop" id="announceModal" onclick="if(event.target===this) closeAnnouncement()">
+        <div class="announce-modal-box">
+            <button class="announce-modal-close" onclick="closeAnnouncement()">&times;</button>
+            <div class="announce-ring" style="margin:0 auto;">
+                <div class="announce-ring-inner" id="modalIconWrap"><i class="bi" id="modalIcon"></i></div>
+            </div>
+            <h5 id="modalTitle"></h5>
+            <p id="modalMessage"></p>
+            <div class="modal-date"><i class="bi bi-clock"></i> <span id="modalDate"></span></div>
+        </div>
+    </div>
+
+    <!-- ============ OUR SERVICES (grid) ============ -->
+    <div class="section-shell" id="servicesSection">
+        <div class="section-eyebrow">What We Offer</div>
+        <div class="section-title">Our Services</div>
+        <div class="section-sub">End-to-end software development for startups and businesses — from a landing page to a full AI-powered platform.</div>
+
+        <div class="services-grid">
+            <a href="#placeOrderForm" class="service-card">
+                <div class="service-icon-wrap"><i class="bi bi-globe2"></i></div>
+                <h6>Website Making</h6>
+                <p>Fast, responsive websites and landing pages built to convert.</p>
+            </a>
+            <a href="#placeOrderForm" class="service-card">
+                <div class="service-icon-wrap"><i class="bi bi-phone-fill"></i></div>
+                <h6>App Making</h6>
+                <p>Android, iOS and cross-platform apps designed around your users.</p>
+            </a>
+            <a href="#placeOrderForm" class="service-card">
+                <div class="service-icon-wrap"><i class="bi bi-diagram-3-fill"></i></div>
+                <h6>ERP Software</h6>
+                <p>Custom ERP systems to manage inventory, staff, sales and operations.</p>
+            </a>
+            <a href="#placeOrderForm" class="service-card">
+                <div class="service-icon-wrap"><i class="bi bi-robot"></i></div>
+                <h6>AI Agents</h6>
+                <p>Intelligent agents and automations that handle real work for you.</p>
+            </a>
+            <a href="#queryForm" class="service-card">
+                <div class="service-icon-wrap"><i class="bi bi-chat-left-text-fill"></i></div>
+                <h6>Submit a Query</h6>
+                <p>Not sure what you need yet? Ask us and we'll guide you.</p>
+            </a>
+            <a href="https://wa.me/{{ whatsapp_number }}" target="_blank" class="service-card">
+                <div class="service-icon-wrap"><i class="bi bi-whatsapp"></i></div>
+                <h6>WhatsApp Support</h6>
+                <p>Chat with us directly for project updates and quick answers.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============ ABOUT ============ -->
+    <div class="section-shell" style="background: var(--white); border: var(--border-ink); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); max-width: 1080px; margin: 30px auto 0 auto; padding-top: 40px; padding-bottom: 40px;">
+        <div class="section-eyebrow">Get To Know Us</div>
+        <div class="section-title">About AV DevLabs</div>
+        <div class="about-flex" style="margin-top: 20px;">
+            <div class="about-img">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AV DevLabs" loading="lazy" decoding="async" style="background:var(--amber-50); padding:24px;">
+            </div>
+            <div class="about-text">
+                <p style="color: var(--ink-600); line-height: 1.8; font-size: 0.95rem;">
+                    AV DevLabs is a technology studio building websites, mobile apps, ERP software and AI Agents for
+                    businesses that want to move fast. We work closely with every client from the first idea to the
+                    final deployment, keeping communication simple and turnaround quick.
+                </p>
+                <div class="shop-badges">
+                    <span class="badge"><i class="bi bi-globe2"></i> Web Development</span>
+                    <span class="badge"><i class="bi bi-phone-fill"></i> App Development</span>
+                    <span class="badge"><i class="bi bi-diagram-3-fill"></i> ERP Software</span>
+                    <span class="badge"><i class="bi bi-robot"></i> AI Agents</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ REVIEWS ============ -->
+    <div class="section-shell">
+        <div class="section-eyebrow">Testimonials</div>
+        <div class="section-title">Our Happy Clients</div>
+        <div class="section-sub">See what people are saying about AV DevLabs — and share your own experience.</div>
+
+        {% if reviews %}
+        <div class="review-scroll">
+            {% for r in reviews %}
+            <div class="review-card">
+                <div class="star-rating">
+                    {% for i in range(1,6) %}{% if i <= r.rating %}★{% else %}<span class="empty">★</span>{% endif %}{% endfor %}
+                </div>
+                <div class="review-name mt-2">{{ r.name }}</div>
+                <div class="review-text">{{ r.review_text }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-star fs-2"></i>
+            <p class="mt-2 mb-0">Be the first to share your experience!</p>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('review') }}" class="btn-hero-secondary" style="display:inline-block;">
+                <i class="bi bi-pencil-square"></i> Write a Review
+            </a>
+        </div>
+    </div>
+
+    <!-- ============ PLACE ORDER ============ -->
+    <div class="section-shell" id="placeOrderForm">
+        <div class="section-eyebrow">Start A Project</div>
+        <div class="section-title">Place an Order</div>
+        <div class="section-sub">Tell us what you want to build. Pick a category, add any special instructions, and we'll get back to you.</div>
+
+        <div class="contact-flex">
+            <div class="contact-form-wrap" style="flex: 1 1 100%;">
+                <div class="form-card" style="margin: 0;">
+                    <form action="{{ url_for('place_order') }}" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" name="name" class="form-control" required placeholder="e.g. Rahul Sharma">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Contact Number *</label>
+                                <input type="text" name="contact_number" class="form-control" required placeholder="e.g. 919876543210">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gmail *</label>
+                                <input type="email" name="gmail" class="form-control" required placeholder="e.g. rahul@gmail.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">What do you want to make? *</label>
+                                <select name="category_choice" id="categoryChoiceOrder" class="form-select" required
+                                        onchange="document.getElementById('newCategoryWrapOrder').style.display = (this.value === '__other__') ? 'block' : 'none';">
+                                    <option value="">Select Category</option>
+                                    {% for c in service_choices %}
+                                    <option value="{{ c }}">{{ c }}</option>
+                                    {% endfor %}
+                                    <option value="__other__">Other (please specify)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="newCategoryWrapOrder" style="display:none;">
+                                <label class="form-label">Specify Category</label>
+                                <input type="text" name="new_category" class="form-control" placeholder="e.g. Chrome Extension">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Special Instructions</label>
+                            <textarea name="special_instructions" class="form-control" rows="4" placeholder="Any specific features, deadlines or details we should know..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="bi bi-send-fill me-1"></i> Submit Order Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ CONTACT / QUERY ============ -->
+    <div class="section-shell" id="queryForm">
+        <div class="section-eyebrow">Keep In Touch</div>
+        <div class="section-title">Submit a Query</div>
+        <div class="section-sub">Have a question before you commit to a project? Tell us and our team will get back to you by email.</div>
+
+        <div class="contact-flex">
+            <div class="contact-info">
+                <div class="contact-info-item">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <div><h6>Visit Us</h6><p>2nd Floor, BLOCK-E, Silver Oak University, Sarkhej - Gandhinagar Hwy, Gota, Ahmedabad, Gujarat 382481</p></div>
+                </div>
+                <div class="contact-info-item">
+                    <i class="bi bi-whatsapp"></i>
+                    <div><h6>WhatsApp</h6><p>+{{ whatsapp_number }}</p></div>
+                </div>
+                <div class="contact-info-item">
+                    <i class="bi bi-clock-fill"></i>
+                    <div><h6>Open Hours</h6><p>Mon – Sat: 9:00 AM – 6:30 PM</p><p>Sun: Closed</p></div>
+                </div>
+            </div>
+
+            <div class="contact-form-wrap">
+                <div class="form-card" style="margin: 0;">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} rounded-3 text-center" style="font-size: 0.9rem;">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form action="/" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" name="name" class="form-control" required placeholder="e.g. Rahul Sharma">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gmail *</label>
+                                <input type="email" name="gmail" class="form-control" required placeholder="e.g. rahul@gmail.com">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Your Query *</label>
+                            <textarea name="query" class="form-control" rows="4" required placeholder="Describe what you need in detail..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit"><i class="bi bi-send-fill me-1"></i> Submit Query — Admin Will Review It</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ FOOTER ============ -->
+    {% include '_footer.html' %}
+
+    </div><!-- /.site-shell -->
+
+    <script>
+        function openAnnouncement(title, message, icon, color, date) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message || 'No additional details.';
+            document.getElementById('modalDate').innerText = date;
+            var iconEl = document.getElementById('modalIcon');
+            iconEl.className = 'bi ' + icon;
+            var wrapEl = document.getElementById('modalIconWrap');
+            wrapEl.className = 'announce-ring-inner color-' + color;
+            document.getElementById('announceModal').classList.add('show');
+        }
+        function closeAnnouncement() {
+            document.getElementById('announceModal').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

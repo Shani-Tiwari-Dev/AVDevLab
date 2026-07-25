@@ -1,0 +1,28 @@
+<div class="top-bar glass-card mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AV DevLabs" style="height:32px;width:32px;object-fit:contain;border-radius:6px;background:var(--white);padding:2px;">
+            AV DevLabs — Admin Panel
+        </h5>
+        <div>
+            <a href="{{ url_for('generate_qr') }}" target="_blank" class="btn btn-light btn-custom me-2"><i class="bi bi-qr-code"></i> QR Code</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-custom"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </div>
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin') }}" class="admin-tab {% if active=='queries' %}active{% endif %}"><i class="bi bi-chat-left-text"></i> Queries</a>
+        <a href="{{ url_for('admin_orders') }}" class="admin-tab {% if active=='orders' %}active{% endif %}"><i class="bi bi-clipboard-check"></i> Place Orders
+            {% if counts and counts.orders_pending %}<span class="badge-count">{{ counts.orders_pending }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin_announcements') }}" class="admin-tab {% if active=='announcements' %}active{% endif %}"><i class="bi bi-megaphone"></i> Announcements
+            {% if counts and counts.announcements %}<span class="badge-count">{{ counts.announcements }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin_reviews') }}" class="admin-tab {% if active=='reviews' %}active{% endif %}"><i class="bi bi-star"></i> Reviews
+            {% if counts and counts.reviews_pending %}<span class="badge-count">{{ counts.reviews_pending }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin_reports') }}" class="admin-tab {% if active=='reports' %}active{% endif %}"><i class="bi bi-file-earmark-spreadsheet"></i> Reports</a>
+        <a href="{{ url_for('admin_trash') }}" class="admin-tab {% if active=='trash' %}active{% endif %}"><i class="bi bi-trash3"></i> Trash
+            {% if counts and counts.trash %}<span class="badge-count">{{ counts.trash }}</span>{% endif %}
+        </a>
+    </div>
+</div>

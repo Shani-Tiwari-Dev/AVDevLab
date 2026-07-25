@@ -1,0 +1,21 @@
+<div class="top-nav">
+    <div class="brand-logo">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AV DevLabs" class="brand-logo-img">
+        <div>
+            AV<span style="font-family:'Inter',sans-serif; font-weight:600; font-size:0.72rem; display:block; color:var(--ink-600); letter-spacing:0.04em; text-transform:uppercase; margin-top:-2px;">DevLabs</span>
+        </div>
+    </div>
+    <div class="nav-tabs-custom">
+        <a href="{{ url_for('index') }}" class="nav-tab-btn {% if active=='home' %}tab-active{% endif %}">Home</a>
+        <a href="{{ url_for('index') }}#servicesSection" class="nav-tab-btn">Services</a>
+        <a href="{{ url_for('index') }}#placeOrderForm" class="nav-tab-btn">Place Order</a>
+        <a href="{{ url_for('review') }}" class="nav-tab-btn {% if active=='review' %}tab-active{% endif %}">Reviews</a>
+        <a href="{{ url_for('index') }}#queryForm" class="nav-tab-btn">Contact</a>
+    </div>
+    <a href="https://wa.me/{{ whatsapp_number }}" target="_blank" class="btn-hero-primary" style="padding:10px 20px; font-size:0.78rem; box-shadow:3px 3px 0 var(--ink-900);">
+        <i class="bi bi-whatsapp"></i> Chat With Us
+    </a>
+</div>
+<a href="https://wa.me/{{ whatsapp_number }}" target="_blank" class="wa-float" title="Chat with us on WhatsApp">
+    <i class="bi bi-whatsapp"></i>
+</a>
