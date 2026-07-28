@@ -92,7 +92,7 @@ TABLE_QUERIES = "queries"
 TABLE_ORDERS = "place_orders"
 TABLE_TRASH = "trash"
 TABLE_ANNOUNCEMENTS = "announcements"
-TABLE_REVIEWS = "reviews"
+TABLE_PROJECTS = "projects"
 TABLE_REPORT_LEADS = "report_leads"
 
 # Contact number for the company (used for the "Chat on WhatsApp" button)
@@ -225,7 +225,7 @@ def get_admin_counts():
         "orders_pending": lambda: count_rows(TABLE_ORDERS, status="Pending"),
         "trash": lambda: count_rows(TABLE_TRASH),
         "announcements": lambda: count_rows(TABLE_ANNOUNCEMENTS),
-        "reviews_pending": lambda: count_rows(TABLE_REVIEWS, status="Pending"),
+        "projects": lambda: count_rows(TABLE_PROJECTS),
     }
     with ThreadPoolExecutor(max_workers=4) as pool:
         futures = {key: pool.submit(fn) for key, fn in jobs.items()}
@@ -277,14 +277,14 @@ def index():
 
     announcements = cached("home_announcements", 30, _fetch)
 
-    def _fetch_reviews():
-        resp = supabase.table(TABLE_REVIEWS).select("*").eq("status", "Approved").order("id", desc=True).limit(12).execute()
+    def _fetch_projects():
+        resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).execute()
         return _with_alias(resp.data)
 
-    reviews = cached("home_reviews", 30, _fetch_reviews)
+    projects = cached("home_projects", 30, _fetch_projects)
 
     return render_template('index.html', whatsapp_number=COMPANY_WHATSAPP_NUMBER, announcements=announcements,
-                            reviews=reviews, service_choices=SERVICE_CHOICES)
+                            projects=projects, service_choices=SERVICE_CHOICES)
 
 
 # ---------------------------------------------------------------------------
@@ -450,77 +450,75 @@ def admin_announcements_delete(announcement_id):
 
 
 # ---------------------------------------------------------------------------
-# REVIEWS (customer feedback -> curated "Our Happy Customers" homepage section)
+# DELIVERED PROJECTS (admin-curated portfolio -> homepage "Delivered Projects")
 # ---------------------------------------------------------------------------
-@app.route('/review', methods=['GET', 'POST'])
-def review():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        whatsapp_number = request.form.get('whatsapp_number')
-        review_text = request.form.get('review_text')
+PROJECTS_BUCKET = "project-photos"
+ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "webp", "gif"}
+
+
+def _allowed_image(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXT
+
+
+def _upload_project_photos(files):
+    """Uploads a list of werkzeug FileStorage objects to Supabase Storage and
+    returns a list of public URLs. Skips anything that isn't a real image
+    file or fails to upload, rather than blowing up the whole request."""
+    import uuid
+    urls = []
+    for f in files:
+        if not f or not f.filename or not _allowed_image(f.filename):
+            continue
+        ext = f.filename.rsplit(".", 1)[1].lower()
+        path = f"{uuid.uuid4().hex}.{ext}"
         try:
-            rating = max(1, min(5, int(request.form.get('rating', 5))))
-        except (TypeError, ValueError):
-            rating = 5
-
-        clean_number = ''.join(filter(str.isdigit, whatsapp_number))
-
-        supabase.table(TABLE_REVIEWS).insert({
-            "name": name,
-            "whatsapp_number": clean_number,
-            "review_text": review_text,
-            "rating": rating,
-            "status": "Pending",
-            "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
-        }).execute()
-
-        flash("Thank you for your feedback! Your review has been submitted. 🌟", "success")
-        return redirect(url_for('review'))
-
-    return render_template('review.html', whatsapp_number=COMPANY_WHATSAPP_NUMBER)
+            data = f.read()
+            supabase.storage.from_(PROJECTS_BUCKET).upload(
+                path, data, {"content-type": f.mimetype or "image/jpeg"}
+            )
+            urls.append(supabase.storage.from_(PROJECTS_BUCKET).get_public_url(path))
+        except Exception as e:
+            print("Project photo upload failed:", e)
+    return urls
 
 
-@app.route('/admin/reviews')
+@app.route('/admin/projects')
 @login_required
-def admin_reviews():
-    status_filter = request.args.get('status', '').strip()
-    q = supabase.table(TABLE_REVIEWS).select("*").order("id", desc=True)
-    if status_filter:
-        q = q.eq("status", status_filter)
-    all_reviews = _with_alias(q.execute().data)
-
-    stats = {
-        "total": count_rows(TABLE_REVIEWS),
-        "pending": count_rows(TABLE_REVIEWS, status="Pending"),
-        "approved": count_rows(TABLE_REVIEWS, status="Approved"),
-        "deleted": count_rows(TABLE_REVIEWS, status="Deleted"),
-    }
-    return render_template('admin_reviews.html', reviews=all_reviews, stats=stats,
-                            counts=get_admin_counts(), status_filter=status_filter)
+def admin_projects():
+    resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).execute()
+    all_projects = _with_alias(resp.data)
+    return render_template('admin_projects.html', projects=all_projects,
+                            counts=get_admin_counts())
 
 
-@app.route('/admin/reviews/update/<review_id>', methods=['POST'])
+@app.route('/admin/projects/add', methods=['POST'])
 @login_required
-def admin_reviews_update(review_id):
-    new_status = request.form.get('status')
-    supabase.table(TABLE_REVIEWS).update({"status": new_status}).eq("id", int(review_id)).execute()
-    invalidate_cache("home_reviews")
-    if new_status == "Approved":
-        flash("Review approved and posted to Our Happy Customers! ⭐", "success")
-    elif new_status == "Deleted":
-        flash("Review marked as deleted.", "success")
-    else:
-        flash("Review set to pending.", "success")
-    return redirect(url_for('admin_reviews'))
+def admin_projects_add():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    link = request.form.get('link')
+    photo_urls = _upload_project_photos(request.files.getlist('photos'))
+
+    supabase.table(TABLE_PROJECTS).insert({
+        "title": title,
+        "description": description,
+        "link": link,
+        "photo_urls": photo_urls,
+        "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
+    }).execute()
+
+    invalidate_cache("home_projects")
+    flash("Project added and posted to Delivered Projects! ✅", "success")
+    return redirect(url_for('admin_projects'))
 
 
-@app.route('/admin/reviews/delete/<review_id>', methods=['POST'])
+@app.route('/admin/projects/delete/<project_id>', methods=['POST'])
 @login_required
-def admin_reviews_delete(review_id):
-    supabase.table(TABLE_REVIEWS).delete().eq("id", int(review_id)).execute()
-    invalidate_cache("home_reviews")
-    flash("Review permanently removed. 🗑️", "success")
-    return redirect(url_for('admin_reviews'))
+def admin_projects_delete(project_id):
+    supabase.table(TABLE_PROJECTS).delete().eq("id", int(project_id)).execute()
+    invalidate_cache("home_projects")
+    flash("Project removed.", "success")
+    return redirect(url_for('admin_projects'))
 
 
 

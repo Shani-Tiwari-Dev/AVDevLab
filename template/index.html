@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ versioned_static('theme.css') }}">
 </head>
 <body>
@@ -18,79 +18,17 @@
     {% include '_user_nav.html' %}
 
     <!-- ============ HERO ============ -->
-    <div class="hero-section hero-modern">
-        <div class="hero-copy">
+    <div class="hero-section hero-modern" style="grid-template-columns: 1fr; text-align: center;">
+        <div class="hero-copy" style="align-items: center;">
             <div class="hero-badge"><i class="bi bi-cpu"></i> Custom Software &amp; AI Solutions</div>
             <div class="hero-title">
                 We build the<br>tech that<br><span class="hero-highlight">powers you.</span>
             </div>
-            <div class="hero-desc">From sleek websites and mobile apps to ERP systems and AI Agents &mdash; AV DevLabs turns your idea into a working product. Tell us what you need, and let's build it together.</div>
-            <div class="hero-cta-row">
+            <div class="hero-desc" style="margin: 0 auto;">From sleek websites and mobile apps to ERP systems and AI Agents &mdash; AV DevLabs turns your idea into a working product. Tell us what you need, and let's build it together.</div>
+            <div class="hero-cta-row" style="justify-content: center;">
                 <a href="#placeOrderForm" class="btn-hero-primary"><i class="bi bi-rocket-takeoff-fill"></i> Place an Order</a>
                 <a href="#servicesSection" class="btn-hero-secondary"><i class="bi bi-grid-fill"></i> Our Services</a>
             </div>
-        </div>
-        <div class="hero-illustration">
-            <svg viewBox="0 0 600 580" xmlns="http://www.w3.org/2000/svg">
-  <!-- soft sky glow behind Garuda -->
-  <g stroke="#1C2118" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#FFFCF3" opacity="0.9">
-    <ellipse cx="88" cy="56" rx="30" ry="14"/>
-    <ellipse cx="114" cy="49" rx="20" ry="11"/>
-    <ellipse cx="504" cy="72" rx="28" ry="13"/>
-    <ellipse cx="528" cy="66" rx="18" ry="10"/>
-  </g>
-
-  <!-- ground -->
-  <path d="M0 580 L0 500 L600 500 L600 580 Z" fill="#FEE588"/>
-  <path d="M0 580 L0 530 L600 530 L600 580 Z" fill="#FCD34D" opacity="0.55"/>
-
-  <!-- radiant sunburst behind Garuda -->
-  <g stroke="#1C2118" stroke-width="3" opacity="0.55">
-    <line x1="300" y1="330" x2="300" y2="60"/>
-    <line x1="300" y1="330" x2="120" y2="130"/>
-    <line x1="300" y1="330" x2="480" y2="130"/>
-    <line x1="300" y1="330" x2="80" y2="260"/>
-    <line x1="300" y1="330" x2="520" y2="260"/>
-    <line x1="300" y1="330" x2="170" y2="70"/>
-    <line x1="300" y1="330" x2="430" y2="70"/>
-  </g>
-  <circle cx="300" cy="330" r="205" fill="#FBC02D" opacity="0.28"/>
-  <circle cx="300" cy="330" r="150" fill="#FFF3C4" opacity="0.55"/>
-
-  <!-- Garuda: wings spread -->
-  <g stroke="#1C2118" stroke-width="4" stroke-linejoin="round">
-    <path d="M300 300 C 210 260, 110 280, 55 210 C 120 230, 170 220, 205 240 C 150 205, 105 195, 70 150 C 140 165, 190 190, 225 225 C 205 180, 190 150, 175 105 C 220 145, 250 195, 268 250 Z" fill="#FBC02D"/>
-    <path d="M300 300 C 390 260, 490 280, 545 210 C 480 230, 430 220, 395 240 C 450 205, 495 195, 530 150 C 460 165, 410 190, 375 225 C 395 180, 410 150, 425 105 C 380 145, 350 195, 332 250 Z" fill="#FBC02D"/>
-  </g>
-
-  <!-- crown/headdress -->
-  <g stroke="#1C2118" stroke-width="3.5" stroke-linejoin="round">
-    <path d="M270 170 L300 110 L330 170 Z" fill="#F5B800"/>
-    <rect x="280" y="160" width="40" height="18" rx="6" fill="#FCD34D"/>
-    <circle cx="300" cy="108" r="8" fill="#FEE588"/>
-  </g>
-
-  <!-- head + torso (seated, folded-hands pose like the mark) -->
-  <g stroke="#1C2118" stroke-width="4" stroke-linejoin="round">
-    <circle cx="300" cy="215" r="34" fill="#FCD34D"/>
-    <path d="M300 246 C 270 250, 250 280, 248 320 L 352 320 C 350 280, 330 250, 300 246 Z" fill="#F5B800"/>
-    <path d="M262 300 C 250 330, 250 365, 270 390 L 330 390 C 350 365, 350 330, 338 300 Z" fill="#FBC02D"/>
-    <!-- folded hands -->
-    <ellipse cx="300" cy="335" rx="20" ry="14" fill="#FEE588"/>
-  </g>
-
-  <!-- legs, seated cross-legged -->
-  <g stroke="#1C2118" stroke-width="4" stroke-linejoin="round">
-    <path d="M265 388 C 235 400, 215 415, 220 435 L 300 435 L 300 400 Z" fill="#F5B800"/>
-    <path d="M335 388 C 365 400, 385 415, 380 435 L 300 435 L 300 400 Z" fill="#F5B800"/>
-  </g>
-
-  <!-- decorative sash / necklace -->
-  <g stroke="#1C2118" stroke-width="2.5">
-    <path d="M275 260 Q300 275 325 260" fill="none"/>
-    <circle cx="300" cy="278" r="5" fill="#FFF3C4"/>
-  </g>
-</svg>
         </div>
     </div>
 
@@ -172,60 +110,47 @@
         </div>
     </div>
 
-    <!-- ============ ABOUT ============ -->
-    <div class="section-shell" style="background: var(--white); border: var(--border-ink); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); max-width: 1080px; margin: 30px auto 0 auto; padding-top: 40px; padding-bottom: 40px;">
-        <div class="section-eyebrow">Get To Know Us</div>
-        <div class="section-title">About AV DevLabs</div>
-        <div class="about-flex" style="margin-top: 20px;">
-            <div class="about-img">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AV DevLabs" loading="lazy" decoding="async" style="background:var(--amber-50); padding:24px;">
-            </div>
-            <div class="about-text">
-                <p style="color: var(--ink-600); line-height: 1.8; font-size: 0.95rem;">
-                    AV DevLabs is a technology studio building websites, mobile apps, ERP software and AI Agents for
-                    businesses that want to move fast. We work closely with every client from the first idea to the
-                    final deployment, keeping communication simple and turnaround quick.
-                </p>
-                <div class="shop-badges">
-                    <span class="badge"><i class="bi bi-globe2"></i> Web Development</span>
-                    <span class="badge"><i class="bi bi-phone-fill"></i> App Development</span>
-                    <span class="badge"><i class="bi bi-diagram-3-fill"></i> ERP Software</span>
-                    <span class="badge"><i class="bi bi-robot"></i> AI Agents</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- ============ DELIVERED PROJECTS ============ -->
+    <div class="section-shell" id="projectsSection">
+        <div class="section-eyebrow">Our Work</div>
+        <div class="section-title">Delivered Projects</div>
+        <div class="section-sub">A look at what we've shipped for clients — real products, live in the wild.</div>
 
-    <!-- ============ REVIEWS ============ -->
-    <div class="section-shell">
-        <div class="section-eyebrow">Testimonials</div>
-        <div class="section-title">Our Happy Clients</div>
-        <div class="section-sub">See what people are saying about AV DevLabs — and share your own experience.</div>
-
-        {% if reviews %}
-        <div class="review-scroll">
-            {% for r in reviews %}
-            <div class="review-card">
-                <div class="star-rating">
-                    {% for i in range(1,6) %}{% if i <= r.rating %}★{% else %}<span class="empty">★</span>{% endif %}{% endfor %}
+        {% if projects %}
+        <div class="project-grid">
+            {% for p in projects %}
+            <div class="project-card">
+                <div class="project-photo-wrap">
+                    {% if p.photo_urls and p.photo_urls|length > 1 %}
+                    <div class="project-photo-scroll">
+                        {% for photo in p.photo_urls %}
+                        <img src="{{ photo }}" alt="{{ p.title }}" loading="lazy" decoding="async">
+                        {% endfor %}
+                    </div>
+                    {% elif p.photo_urls and p.photo_urls|length == 1 %}
+                    <img src="{{ p.photo_urls[0] }}" alt="{{ p.title }}" loading="lazy" decoding="async">
+                    {% else %}
+                    <div class="no-photo"><i class="bi bi-image"></i></div>
+                    {% endif %}
                 </div>
-                <div class="review-name mt-2">{{ r.name }}</div>
-                <div class="review-text">{{ r.review_text }}</div>
+                <div class="project-body">
+                    <div class="project-title">{{ p.title }}</div>
+                    <div class="project-desc">{{ p.description }}</div>
+                    {% if p.link %}
+                    <a href="{{ p.link }}" target="_blank" rel="noopener" class="project-link-btn">
+                        See the Project <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-4 text-muted">
-            <i class="bi bi-star fs-2"></i>
-            <p class="mt-2 mb-0">Be the first to share your experience!</p>
+        <div class="project-empty">
+            <i class="bi bi-kanban fs-2"></i>
+            <p class="mt-2 mb-0">Projects coming soon.</p>
         </div>
         {% endif %}
-
-        <div class="text-center mt-3">
-            <a href="{{ url_for('review') }}" class="btn-hero-secondary" style="display:inline-block;">
-                <i class="bi bi-pencil-square"></i> Write a Review
-            </a>
-        </div>
     </div>
 
     <!-- ============ PLACE ORDER ============ -->

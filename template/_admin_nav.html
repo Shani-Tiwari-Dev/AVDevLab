@@ -17,8 +17,8 @@
         <a href="{{ url_for('admin_announcements') }}" class="admin-tab {% if active=='announcements' %}active{% endif %}"><i class="bi bi-megaphone"></i> Announcements
             {% if counts and counts.announcements %}<span class="badge-count">{{ counts.announcements }}</span>{% endif %}
         </a>
-        <a href="{{ url_for('admin_reviews') }}" class="admin-tab {% if active=='reviews' %}active{% endif %}"><i class="bi bi-star"></i> Reviews
-            {% if counts and counts.reviews_pending %}<span class="badge-count">{{ counts.reviews_pending }}</span>{% endif %}
+        <a href="{{ url_for('admin_projects') }}" class="admin-tab {% if active=='projects' %}active{% endif %}"><i class="bi bi-kanban"></i> Projects
+            {% if counts and counts.projects %}<span class="badge-count">{{ counts.projects }}</span>{% endif %}
         </a>
         <a href="{{ url_for('admin_reports') }}" class="admin-tab {% if active=='reports' %}active{% endif %}"><i class="bi bi-file-earmark-spreadsheet"></i> Reports</a>
         <a href="{{ url_for('admin_trash') }}" class="admin-tab {% if active=='trash' %}active{% endif %}"><i class="bi bi-trash3"></i> Trash
