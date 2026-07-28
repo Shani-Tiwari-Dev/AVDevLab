@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>(function(){var t=localStorage.getItem("av_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Delivered Projects</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
@@ -54,7 +55,7 @@
         {% for p in projects %}
         <div class="req-card d-flex align-items-center gap-3">
             {% if p.photo_urls and p.photo_urls|length > 0 %}
-            <img src="{{ p.photo_urls[0] }}" alt="{{ p.title }}" style="width:64px;height:64px;object-fit:cover;border-radius:12px;border:1.5px solid var(--ink-900);flex-shrink:0;">
+            <img src="{{ p.photo_urls[0] }}" alt="{{ p.title }}" style="width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid rgba(18,32,15,0.12);flex-shrink:0;">
             {% else %}
             <div class="no-photo-sm" style="width:64px;height:64px;border-radius:12px;">
                 <i class="bi bi-image"></i>
@@ -77,5 +78,6 @@
         </div>
         {% endfor %}
     </div>
+    <script src="{{ versioned_static('theme-toggle.js') }}"></script>
 </body>
 </html>

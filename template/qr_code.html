@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>(function(){var t=localStorage.getItem("av_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AV DevLabs - Scan to Contact</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
@@ -11,6 +12,10 @@
     <link rel="stylesheet" href="{{ versioned_static('theme.css') }}">
 </head>
 <body class="qr-page-bg">
+    <button type="button" class="theme-toggle" title="Toggle dark / light theme" aria-label="Toggle theme" style="position:fixed; top:20px; right:20px; z-index:50;">
+        <i class="bi bi-sun-fill"></i>
+        <i class="bi bi-moon-stars-fill"></i>
+    </button>
     <div class="qr-card">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AV DevLabs" class="qr-logo-img mb-3">
         <div class="title">AV DevLabs</div>
@@ -22,5 +27,6 @@
             <a href="/admin" class="btn-back">← Back to Dashboard</a>
         </div>
     </div>
+    <script src="{{ versioned_static('theme-toggle.js') }}"></script>
 </body>
 </html>
