@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script>(function(){var t=localStorage.getItem("av_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Trash</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
@@ -62,6 +61,5 @@
         </div>
         {% endfor %}
     </div>
-    <script src="{{ versioned_static('theme-toggle.js') }}"></script>
 </body>
 </html>

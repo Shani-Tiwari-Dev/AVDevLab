@@ -4,12 +4,8 @@
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AV DevLabs" style="height:32px;width:32px;object-fit:contain;border-radius:6px;background:var(--white);padding:2px;">
             AV DevLabs — Admin Panel
         </h5>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="theme-toggle" title="Toggle dark / light theme" aria-label="Toggle theme">
-                <i class="bi bi-sun-fill"></i>
-                <i class="bi bi-moon-stars-fill"></i>
-            </button>
-            <a href="{{ url_for('generate_qr') }}" target="_blank" class="btn btn-light btn-custom"><i class="bi bi-qr-code"></i> QR Code</a>
+        <div>
+            <a href="{{ url_for('generate_qr') }}" target="_blank" class="btn btn-light btn-custom me-2"><i class="bi bi-qr-code"></i> QR Code</a>
             <a href="{{ url_for('logout') }}" class="btn btn-danger btn-custom"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
@@ -21,7 +17,7 @@
         <a href="{{ url_for('admin_announcements') }}" class="admin-tab {% if active=='announcements' %}active{% endif %}"><i class="bi bi-megaphone"></i> Announcements
             {% if counts and counts.announcements %}<span class="badge-count">{{ counts.announcements }}</span>{% endif %}
         </a>
-        <a href="{{ url_for('admin_projects') }}" class="admin-tab {% if active=='projects' %}active{% endif %}"><i class="bi bi-kanban"></i> Projects
+        <a href="{{ url_for('admin_projects') }}" class="admin-tab {% if active=='projects' %}active{% endif %}"><i class="bi bi-kanban"></i> Delivered Projects
             {% if counts and counts.projects %}<span class="badge-count">{{ counts.projects }}</span>{% endif %}
         </a>
         <a href="{{ url_for('admin_reports') }}" class="admin-tab {% if active=='reports' %}active{% endif %}"><i class="bi bi-file-earmark-spreadsheet"></i> Reports</a>

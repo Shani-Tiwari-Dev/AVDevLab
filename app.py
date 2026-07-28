@@ -95,6 +95,11 @@ TABLE_ANNOUNCEMENTS = "announcements"
 TABLE_PROJECTS = "projects"
 TABLE_REPORT_LEADS = "report_leads"
 
+# Supabase Storage bucket that holds "Delivered Projects" photos. Must be
+# created once in the Supabase dashboard (Storage > New bucket > "project-images",
+# set Public = ON so the homepage can load the photos directly by URL).
+PROJECT_IMAGES_BUCKET = "project-images"
+
 # Contact number for the company (used for the "Chat on WhatsApp" button)
 COMPANY_WHATSAPP_NUMBER = "919825089454"
 
@@ -278,7 +283,7 @@ def index():
     announcements = cached("home_announcements", 30, _fetch)
 
     def _fetch_projects():
-        resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).execute()
+        resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).limit(24).execute()
         return _with_alias(resp.data)
 
     projects = cached("home_projects", 30, _fetch_projects)
@@ -450,35 +455,32 @@ def admin_announcements_delete(announcement_id):
 
 
 # ---------------------------------------------------------------------------
-# DELIVERED PROJECTS (admin-curated portfolio -> homepage "Delivered Projects")
+# DELIVERED PROJECTS (admin-curated "Delivered Projects" homepage section)
 # ---------------------------------------------------------------------------
-PROJECTS_BUCKET = "project-photos"
-ALLOWED_IMAGE_EXT = {"png", "jpg", "jpeg", "webp", "gif"}
+ALLOWED_IMAGE_EXT = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
 
 
-def _allowed_image(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXT
-
-
-def _upload_project_photos(files):
-    """Uploads a list of werkzeug FileStorage objects to Supabase Storage and
-    returns a list of public URLs. Skips anything that isn't a real image
-    file or fails to upload, rather than blowing up the whole request."""
+def _upload_project_images(files):
+    """Uploads each file to Supabase Storage under PROJECT_IMAGES_BUCKET and
+    returns a list of public URLs. Files with an unsupported extension are
+    silently skipped rather than failing the whole submission."""
     import uuid
     urls = []
     for f in files:
-        if not f or not f.filename or not _allowed_image(f.filename):
+        if not f or not f.filename:
             continue
-        ext = f.filename.rsplit(".", 1)[1].lower()
-        path = f"{uuid.uuid4().hex}.{ext}"
+        ext = os.path.splitext(f.filename)[1].lower()
+        if ext not in ALLOWED_IMAGE_EXT:
+            continue
+        path = f"{uuid.uuid4().hex}{ext}"
+        content_type = f.mimetype or 'application/octet-stream'
         try:
-            data = f.read()
-            supabase.storage.from_(PROJECTS_BUCKET).upload(
-                path, data, {"content-type": f.mimetype or "image/jpeg"}
+            supabase.storage.from_(PROJECT_IMAGES_BUCKET).upload(
+                path, f.read(), {"content-type": content_type}
             )
-            urls.append(supabase.storage.from_(PROJECTS_BUCKET).get_public_url(path))
+            urls.append(supabase.storage.from_(PROJECT_IMAGES_BUCKET).get_public_url(path))
         except Exception as e:
-            print("Project photo upload failed:", e)
+            print("[project image upload] failed:", e)
     return urls
 
 
@@ -487,28 +489,31 @@ def _upload_project_photos(files):
 def admin_projects():
     resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).execute()
     all_projects = _with_alias(resp.data)
-    return render_template('admin_projects.html', projects=all_projects,
-                            counts=get_admin_counts())
+    return render_template('admin_projects.html', projects=all_projects, counts=get_admin_counts())
 
 
 @app.route('/admin/projects/add', methods=['POST'])
 @login_required
 def admin_projects_add():
-    title = request.form.get('title')
-    description = request.form.get('description')
-    link = request.form.get('link')
-    photo_urls = _upload_project_photos(request.files.getlist('photos'))
+    title = request.form.get('title', '').strip()
+    description = request.form.get('description', '').strip()
+    link = request.form.get('link', '').strip()
+
+    if not title:
+        flash("Project title is required.", "danger")
+        return redirect(url_for('admin_projects'))
+
+    image_urls = _upload_project_images(request.files.getlist('photos'))
 
     supabase.table(TABLE_PROJECTS).insert({
         "title": title,
         "description": description,
         "link": link,
-        "photo_urls": photo_urls,
+        "image_urls": image_urls,
         "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
     }).execute()
-
     invalidate_cache("home_projects")
-    flash("Project added and posted to Delivered Projects! ✅", "success")
+    flash("Project added to Delivered Projects! 🚀", "success")
     return redirect(url_for('admin_projects'))
 
 

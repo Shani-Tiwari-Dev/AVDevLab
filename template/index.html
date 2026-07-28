@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script>(function(){var t=localStorage.getItem("av_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AV DevLabs — Websites, Apps, ERP &amp; AI Agents</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
@@ -19,17 +18,56 @@
     {% include '_user_nav.html' %}
 
     <!-- ============ HERO ============ -->
-    <div class="hero-section hero-modern" style="grid-template-columns: 1fr; text-align: center;">
-        <div class="hero-copy" style="align-items: center;">
+    <div class="hero-section hero-modern">
+        <div class="hero-copy">
             <div class="hero-badge"><i class="bi bi-cpu"></i> Custom Software &amp; AI Solutions</div>
             <div class="hero-title">
                 We build the<br>tech that<br><span class="hero-highlight">powers you.</span>
             </div>
-            <div class="hero-desc" style="margin: 0 auto;">From sleek websites and mobile apps to ERP systems and AI Agents &mdash; AV DevLabs turns your idea into a working product. Tell us what you need, and let's build it together.</div>
-            <div class="hero-cta-row" style="justify-content: center;">
+            <div class="hero-desc">From sleek websites and mobile apps to ERP systems and AI Agents &mdash; AV DevLabs turns your idea into a working product. Tell us what you need, and let's build it together.</div>
+            <div class="hero-cta-row">
                 <a href="#placeOrderForm" class="btn-hero-primary"><i class="bi bi-rocket-takeoff-fill"></i> Place an Order</a>
                 <a href="#servicesSection" class="btn-hero-secondary"><i class="bi bi-grid-fill"></i> Our Services</a>
             </div>
+        </div>
+        <div class="hero-illustration">
+            <svg viewBox="0 0 600 580" xmlns="http://www.w3.org/2000/svg">
+  <!-- soft radial glow -->
+  <circle cx="330" cy="290" r="230" fill="#6FCF23" opacity="0.10"/>
+  <circle cx="330" cy="290" r="165" fill="#8AD63C" opacity="0.14"/>
+
+  <!-- floating hex mark echoing the logo -->
+  <g transform="translate(330,270)">
+    <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75"
+             fill="none" stroke="#131A10" stroke-width="3" stroke-linejoin="round" opacity="0.14"/>
+    <polygon points="0,-92 80,-46 80,46 0,92 -80,46 -80,-46"
+             fill="url(#heroHex)" stroke="#16210E" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="0,-56 34,44 12,44 0,10 -12,44 -34,44" fill="#F6FBEF"/>
+  </g>
+
+  <!-- scattered code / connection dots -->
+  <g fill="#6FCF23">
+    <circle cx="90" cy="120" r="7"/>
+    <circle cx="60" cy="220" r="5"/>
+    <circle cx="120" cy="420" r="6"/>
+    <circle cx="520" cy="150" r="6"/>
+    <circle cx="550" cy="330" r="7"/>
+    <circle cx="480" cy="460" r="5"/>
+  </g>
+  <g stroke="#8AD63C" stroke-width="2" opacity="0.5">
+    <line x1="90" y1="120" x2="200" y2="180"/>
+    <line x1="60" y1="220" x2="180" y2="250"/>
+    <line x1="520" y1="150" x2="420" y2="200"/>
+    <line x1="550" y1="330" x2="440" y2="330"/>
+  </g>
+
+  <defs>
+    <linearGradient id="heroHex" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8AD63C"/>
+      <stop offset="100%" stop-color="#3F8014"/>
+    </linearGradient>
+  </defs>
+</svg>
         </div>
     </div>
 
@@ -115,41 +153,36 @@
     <div class="section-shell" id="projectsSection">
         <div class="section-eyebrow">Our Work</div>
         <div class="section-title">Delivered Projects</div>
-        <div class="section-sub">A look at what we've shipped for clients — real products, live in the wild.</div>
+        <div class="section-sub">A few of the products we've shipped for clients — websites, apps, ERP systems and AI agents, live and in use.</div>
 
         {% if projects %}
-        <div class="project-grid">
+        <div class="projects-grid">
             {% for p in projects %}
             <div class="project-card">
                 <div class="project-photo-wrap">
-                    {% if p.photo_urls and p.photo_urls|length > 1 %}
-                    <div class="project-photo-scroll">
-                        {% for photo in p.photo_urls %}
-                        <img src="{{ photo }}" alt="{{ p.title }}" loading="lazy" decoding="async">
-                        {% endfor %}
-                    </div>
-                    {% elif p.photo_urls and p.photo_urls|length == 1 %}
-                    <img src="{{ p.photo_urls[0] }}" alt="{{ p.title }}" loading="lazy" decoding="async">
+                    {% if p.image_urls and p.image_urls|length > 0 %}
+                    <img src="{{ p.image_urls[0] }}" alt="{{ p.title }}" class="project-photo" loading="lazy" decoding="async">
+                    {% if p.image_urls|length > 1 %}
+                    <span class="project-photo-count"><i class="bi bi-images"></i> {{ p.image_urls|length }}</span>
+                    {% endif %}
                     {% else %}
-                    <div class="no-photo"><i class="bi bi-image"></i></div>
+                    <div class="project-photo no-photo"><i class="bi bi-image"></i></div>
                     {% endif %}
                 </div>
                 <div class="project-body">
-                    <div class="project-title">{{ p.title }}</div>
-                    <div class="project-desc">{{ p.description }}</div>
+                    <h6>{{ p.title }}</h6>
+                    <p>{{ p.description }}</p>
                     {% if p.link %}
-                    <a href="{{ p.link }}" target="_blank" rel="noopener" class="project-link-btn">
-                        See the Project <i class="bi bi-arrow-up-right"></i>
-                    </a>
+                    <a href="{{ p.link }}" target="_blank" rel="noopener" class="project-link">See the Project <i class="bi bi-arrow-up-right"></i></a>
                     {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="project-empty">
+        <div class="text-center py-4 text-muted">
             <i class="bi bi-kanban fs-2"></i>
-            <p class="mt-2 mb-0">Projects coming soon.</p>
+            <p class="mt-2 mb-0">Our delivered projects will show up here soon.</p>
         </div>
         {% endif %}
     </div>
@@ -289,6 +322,5 @@
         }
     </script>
 
-    <script src="{{ versioned_static('theme-toggle.js') }}"></script>
 </body>
 </html>
