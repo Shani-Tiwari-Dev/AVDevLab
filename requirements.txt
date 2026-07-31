@@ -3,4 +3,5 @@ Flask-Compress
 supabase
 python-dotenv
 qrcode
+Pillow
 openpyxl
