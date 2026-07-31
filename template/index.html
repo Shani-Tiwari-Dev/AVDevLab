@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ versioned_static('theme.css') }}">
 </head>
 <body>
@@ -19,18 +19,18 @@
 
     <!-- ============ HERO ============ -->
     <div class="hero-section hero-modern">
-        <div class="hero-copy">
+        <div class="hero-copy reveal">
             <div class="hero-badge"><i class="bi bi-cpu"></i> Custom Software &amp; AI Solutions</div>
             <div class="hero-title">
                 We build the<br>tech that<br><span class="hero-highlight">powers you.</span>
             </div>
             <div class="hero-desc">From sleek websites and mobile apps to ERP systems and AI Agents &mdash; AV DevLabs turns your idea into a working product. Tell us what you need, and let's build it together.</div>
             <div class="hero-cta-row">
-                <a href="#placeOrderForm" class="btn-hero-primary"><i class="bi bi-rocket-takeoff-fill"></i> Place an Order</a>
+                <button type="button" class="btn-hero-primary" onclick="openModal('placeOrderModal')"><i class="bi bi-rocket-takeoff-fill"></i> Place an Order</button>
                 <a href="#servicesSection" class="btn-hero-secondary"><i class="bi bi-grid-fill"></i> Our Services</a>
             </div>
         </div>
-        <div class="hero-illustration">
+        <div class="hero-illustration reveal">
             <svg viewBox="0 0 600 580" xmlns="http://www.w3.org/2000/svg">
   <!-- soft radial glow -->
   <circle cx="330" cy="290" r="230" fill="#6FCF23" opacity="0.10"/>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- ============ ANNOUNCEMENTS (circular story-style cards) ============ -->
-    <div class="announce-section">
+    <div class="announce-section reveal">
         <div class="section-shell tight" style="padding-bottom: 6px;">
             <div class="section-eyebrow">What's New</div>
             <div class="section-title" style="font-size:1.3rem;"><i class="bi bi-megaphone-fill text-amber"></i> Announcements</div>
@@ -110,32 +110,37 @@
     </div>
 
     <!-- ============ OUR SERVICES (grid) ============ -->
-    <div class="section-shell" id="servicesSection">
+    <div class="section-shell reveal" id="servicesSection">
         <div class="section-eyebrow">What We Offer</div>
         <div class="section-title">Our Services</div>
         <div class="section-sub">End-to-end software development for startups and businesses — from a landing page to a full AI-powered platform.</div>
 
-        <div class="services-grid">
-            <a href="#placeOrderForm" class="service-card">
+        <div class="services-grid reveal-stagger">
+            <button type="button" class="service-card" onclick="openModal('placeOrderModal')">
                 <div class="service-icon-wrap"><i class="bi bi-globe2"></i></div>
                 <h6>Website Making</h6>
                 <p>Fast, responsive websites and landing pages built to convert.</p>
-            </a>
-            <a href="#placeOrderForm" class="service-card">
+            </button>
+            <button type="button" class="service-card" onclick="openModal('placeOrderModal')">
                 <div class="service-icon-wrap"><i class="bi bi-phone-fill"></i></div>
                 <h6>App Making</h6>
                 <p>Android, iOS and cross-platform apps designed around your users.</p>
-            </a>
-            <a href="#placeOrderForm" class="service-card">
+            </button>
+            <button type="button" class="service-card" onclick="openModal('placeOrderModal')">
                 <div class="service-icon-wrap"><i class="bi bi-diagram-3-fill"></i></div>
                 <h6>ERP Software</h6>
                 <p>Custom ERP systems to manage inventory, staff, sales and operations.</p>
-            </a>
-            <a href="#placeOrderForm" class="service-card">
+            </button>
+            <button type="button" class="service-card" onclick="openModal('placeOrderModal')">
                 <div class="service-icon-wrap"><i class="bi bi-robot"></i></div>
                 <h6>AI Agents</h6>
                 <p>Intelligent agents and automations that handle real work for you.</p>
-            </a>
+            </button>
+            <button type="button" class="service-card" onclick="openModal('projectsModal')">
+                <div class="service-icon-wrap"><i class="bi bi-kanban-fill"></i></div>
+                <h6>Delivered Projects</h6>
+                <p>See what we've already shipped for other clients.</p>
+            </button>
             <a href="#queryForm" class="service-card">
                 <div class="service-icon-wrap"><i class="bi bi-chat-left-text-fill"></i></div>
                 <h6>Submit a Query</h6>
@@ -149,104 +154,8 @@
         </div>
     </div>
 
-    <!-- ============ DELIVERED PROJECTS ============ -->
-    <div class="section-shell" id="projectsSection">
-        <div class="section-eyebrow">Our Work</div>
-        <div class="section-title">Delivered Projects</div>
-        <div class="section-sub">A few of the products we've shipped for clients — websites, apps, ERP systems and AI agents, live and in use.</div>
-
-        {% if projects %}
-        <div class="projects-grid">
-            {% for p in projects %}
-            <div class="project-card">
-                <div class="project-photo-wrap">
-                    {% if p.image_urls and p.image_urls|length > 0 %}
-                    <img src="{{ p.image_urls[0] }}" alt="{{ p.title }}" class="project-photo" loading="lazy" decoding="async">
-                    {% if p.image_urls|length > 1 %}
-                    <span class="project-photo-count"><i class="bi bi-images"></i> {{ p.image_urls|length }}</span>
-                    {% endif %}
-                    {% else %}
-                    <div class="project-photo no-photo"><i class="bi bi-image"></i></div>
-                    {% endif %}
-                </div>
-                <div class="project-body">
-                    <h6>{{ p.title }}</h6>
-                    <p>{{ p.description }}</p>
-                    {% if p.link %}
-                    <a href="{{ p.link }}" target="_blank" rel="noopener" class="project-link">See the Project <i class="bi bi-arrow-up-right"></i></a>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-4 text-muted">
-            <i class="bi bi-kanban fs-2"></i>
-            <p class="mt-2 mb-0">Our delivered projects will show up here soon.</p>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- ============ PLACE ORDER ============ -->
-    <div class="section-shell" id="placeOrderForm">
-        <div class="section-eyebrow">Start A Project</div>
-        <div class="section-title">Place an Order</div>
-        <div class="section-sub">Tell us what you want to build. Pick a category, add any special instructions, and we'll get back to you.</div>
-
-        <div class="contact-flex">
-            <div class="contact-form-wrap" style="flex: 1 1 100%;">
-                <div class="form-card" style="margin: 0;">
-                    <form action="{{ url_for('place_order') }}" method="POST">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Full Name *</label>
-                                <input type="text" name="name" class="form-control" required placeholder="e.g. Rahul Sharma">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Contact Number *</label>
-                                <input type="text" name="contact_number" class="form-control" required placeholder="e.g. 919876543210">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Gmail *</label>
-                                <input type="email" name="gmail" class="form-control" required placeholder="e.g. rahul@gmail.com">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">What do you want to make? *</label>
-                                <select name="category_choice" id="categoryChoiceOrder" class="form-select" required
-                                        onchange="document.getElementById('newCategoryWrapOrder').style.display = (this.value === '__other__') ? 'block' : 'none';">
-                                    <option value="">Select Category</option>
-                                    {% for c in service_choices %}
-                                    <option value="{{ c }}">{{ c }}</option>
-                                    {% endfor %}
-                                    <option value="__other__">Other (please specify)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3" id="newCategoryWrapOrder" style="display:none;">
-                                <label class="form-label">Specify Category</label>
-                                <input type="text" name="new_category" class="form-control" placeholder="e.g. Chrome Extension">
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Special Instructions</label>
-                            <textarea name="special_instructions" class="form-control" rows="4" placeholder="Any specific features, deadlines or details we should know..."></textarea>
-                        </div>
-
-                        <button type="submit" class="btn-submit"><i class="bi bi-send-fill me-1"></i> Submit Order Request</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- ============ CONTACT / QUERY ============ -->
-    <div class="section-shell" id="queryForm">
+    <div class="section-shell reveal" id="queryForm">
         <div class="section-eyebrow">Keep In Touch</div>
         <div class="section-title">Submit a Query</div>
         <div class="section-sub">Have a question before you commit to a project? Tell us and our team will get back to you by email.</div>
@@ -306,6 +215,110 @@
 
     </div><!-- /.site-shell -->
 
+    <!-- ============ PLACE ORDER — hidden until opened ============ -->
+    <div class="full-modal-backdrop" id="placeOrderModal" onclick="if(event.target===this) closeModal('placeOrderModal')">
+        <div class="full-modal-box">
+            <button type="button" class="announce-modal-close" onclick="closeModal('placeOrderModal')">&times;</button>
+            <div class="section-eyebrow" style="margin-left:0;">Start A Project</div>
+            <div class="section-title" style="text-align:left; font-size:1.7rem;">Place an Order</div>
+            <div class="section-sub" style="text-align:left; margin:0 0 26px 0;">Tell us what you want to build. Pick a category, add any special instructions, and we'll get back to you.</div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} rounded-3 text-center" style="font-size: 0.9rem;">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('place_order') }}" method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="name" class="form-control" required placeholder="e.g. Rahul Sharma">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Contact Number *</label>
+                        <input type="text" name="contact_number" class="form-control" required placeholder="e.g. 919876543210">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Gmail *</label>
+                        <input type="email" name="gmail" class="form-control" required placeholder="e.g. rahul@gmail.com">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">What do you want to make? *</label>
+                        <select name="category_choice" id="categoryChoiceOrder" class="form-select" required
+                                onchange="document.getElementById('newCategoryWrapOrder').style.display = (this.value === '__other__') ? 'block' : 'none';">
+                            <option value="">Select Category</option>
+                            {% for c in service_choices %}
+                            <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                            <option value="__other__">Other (please specify)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3" id="newCategoryWrapOrder" style="display:none;">
+                        <label class="form-label">Specify Category</label>
+                        <input type="text" name="new_category" class="form-control" placeholder="e.g. Chrome Extension">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Special Instructions</label>
+                    <textarea name="special_instructions" class="form-control" rows="4" placeholder="Any specific features, deadlines or details we should know..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit"><i class="bi bi-send-fill me-1"></i> Submit Order Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ DELIVERED PROJECTS — hidden until opened ============ -->
+    <div class="full-modal-backdrop" id="projectsModal" onclick="if(event.target===this) closeModal('projectsModal')">
+        <div class="full-modal-box full-modal-wide">
+            <button type="button" class="announce-modal-close" onclick="closeModal('projectsModal')">&times;</button>
+            <div class="section-eyebrow" style="margin-left:0;">Our Work</div>
+            <div class="section-title" style="text-align:left; font-size:1.7rem;">Delivered Projects</div>
+            <div class="section-sub" style="text-align:left; margin:0 0 10px 0;">A few of the products we've shipped for clients — websites, apps, ERP systems and AI agents, live and in use.</div>
+
+            {% if projects %}
+            <div class="projects-grid">
+                {% for p in projects %}
+                <div class="project-card">
+                    <div class="project-photo-wrap">
+                        {% if p.image_urls and p.image_urls|length > 0 %}
+                        <img src="{{ p.image_urls[0] }}" alt="{{ p.title }}" class="project-photo" loading="lazy" decoding="async">
+                        {% if p.image_urls|length > 1 %}
+                        <span class="project-photo-count"><i class="bi bi-images"></i> {{ p.image_urls|length }}</span>
+                        {% endif %}
+                        {% else %}
+                        <div class="project-photo no-photo"><i class="bi bi-image"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="project-body">
+                        <h6>{{ p.title }}</h6>
+                        <p>{{ p.description }}</p>
+                        {% if p.link %}
+                        <a href="{{ p.link }}" target="_blank" rel="noopener" class="project-link">See the Project <i class="bi bi-arrow-up-right"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-kanban fs-2"></i>
+                <p class="mt-2 mb-0">Our delivered projects will show up here soon.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
     <script>
         function openAnnouncement(title, message, icon, color, date) {
             document.getElementById('modalTitle').innerText = title;
@@ -320,6 +333,39 @@
         function closeAnnouncement() {
             document.getElementById('announceModal').classList.remove('show');
         }
+
+        // Generic modal helpers — used for Place Order & Delivered Projects,
+        // which are deliberately kept OUT of the normal scroll flow and only
+        // ever appear when their trigger button is clicked.
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // If the server redirected back here after a Place Order submission
+        // (see app.py -> url_for('index') + '#placeOrderForm'), reopen the
+        // modal automatically so the confirmation message is visible.
+        if (window.location.hash === '#placeOrderForm') {
+            openModal('placeOrderModal');
+        }
+
+        // Scroll-reveal: fade/slide sections and cards in as they enter view.
+        document.addEventListener('DOMContentLoaded', function () {
+            var revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+            revealEls.forEach(function (el) { observer.observe(el); });
+        });
     </script>
 
 </body>
