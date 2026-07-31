@@ -101,7 +101,9 @@ TABLE_REPORT_LEADS = "report_leads"
 PROJECT_IMAGES_BUCKET = "project-images"
 
 # Contact number for the company (used for the "Chat on WhatsApp" button)
-COMPANY_WHATSAPP_NUMBER = "919825089454"
+COMPANY_WHATSAPP_NUMBER = "917297022722"
+COMPANY_SECOND_WHATSAPP_NUMBER = "917859968905"
+COMPANY_MAIL_ID = "avdevlab@gmail.com"
 
 # Service categories shown on the "Place Order" form. Visitors can also type
 # a custom category via "Other" if theirs isn't listed.
@@ -288,7 +290,7 @@ def index():
 
     projects = cached("home_projects", 30, _fetch_projects)
 
-    return render_template('index.html', whatsapp_number=COMPANY_WHATSAPP_NUMBER, announcements=announcements,
+    return render_template('index.html', whatsapp_number=COMPANY_WHATSAPP_NUMBER,second_whatsapp_number=COMPANY_SECOND_WHATSAPP_NUMBER,email = COMPANY_MAIL_ID, announcements=announcements,
                             projects=projects, service_choices=SERVICE_CHOICES)
 
 

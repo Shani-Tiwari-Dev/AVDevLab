@@ -213,21 +213,6 @@
                 <h6>AI Agents</h6>
                 <p>Intelligent agents and automations that handle real work for you.</p>
             </button>
-            <button type="button" class="service-card" onclick="openModal('projectsModal')">
-                <div class="service-icon-wrap"><i class="bi bi-kanban-fill"></i></div>
-                <h6>Delivered Projects</h6>
-                <p>See what we've already shipped for other clients.</p>
-            </button>
-            <a href="#queryForm" class="service-card">
-                <div class="service-icon-wrap"><i class="bi bi-chat-left-text-fill"></i></div>
-                <h6>Submit a Query</h6>
-                <p>Not sure what you need yet? Ask us and we'll guide you.</p>
-            </a>
-            <a href="https://wa.me/{{ whatsapp_number }}" target="_blank" class="service-card">
-                <div class="service-icon-wrap"><i class="bi bi-whatsapp"></i></div>
-                <h6>WhatsApp Support</h6>
-                <p>Chat with us directly for project updates and quick answers.</p>
-            </a>
         </div>
     </div>
 
@@ -240,16 +225,16 @@
         <div class="contact-flex">
             <div class="contact-info">
                 <div class="contact-info-item">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <div><h6>Visit Us</h6><p>2nd Floor, BLOCK-E, Silver Oak University, Sarkhej - Gandhinagar Hwy, Gota, Ahmedabad, Gujarat 382481</p></div>
+                    <i class="bi bi-envelope-fill"></i>
+                    <div><h6>Email</h6><p>{{ email }}</p></div>
                 </div>
                 <div class="contact-info-item">
                     <i class="bi bi-whatsapp"></i>
-                    <div><h6>WhatsApp</h6><p>+{{ whatsapp_number }}</p></div>
+                    <div><h6>WhatsApp</h6><p>+{{ whatsapp_number }}</p><p>+{{ second_whatsapp_number }}</p></div>
                 </div>
                 <div class="contact-info-item">
                     <i class="bi bi-clock-fill"></i>
-                    <div><h6>Open Hours</h6><p>Mon – Sat: 9:00 AM – 6:30 PM</p><p>Sun: Closed</p></div>
+                    <div><h6>Open Hours</h6><p>24 x 7</p></div>
                 </div>
             </div>
 
