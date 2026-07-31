@@ -9,33 +9,26 @@ import time
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
-
 # Set to "1" automatically by Vercel at runtime. Used below to adjust
 # behaviour that only makes sense on a normal always-on server (background
 # threads) vs. a serverless deployment (Vercel).
 ON_VERCEL = bool(os.environ.get("VERCEL"))
-
 # Load .env file FIRST
 load_dotenv()
-
 # Then read variables
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-
 print("URL:", SUPABASE_URL)
-print("KEY:", SUPABASE_SERVICE_KEY[:20] + "...")  # Don't print the full key
-
+print("KEY:", (SUPABASE_SERVICE_KEY[:20] + "...") if SUPABASE_SERVICE_KEY else "MISSING! Set SUPABASE_SERVICE_KEY in your environment.")
 supabase: Client = create_client(
     SUPABASE_URL,
     SUPABASE_SERVICE_KEY
 )
-
 app = Flask(__name__, template_folder='template')
 # Reads FLASK_SECRET_KEY if set (recommended in production / Vercel env vars),
 # otherwise falls back to the original hardcoded value so nothing breaks.
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "av_devlabs_secret")
 app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB max upload size
-
 # ---------------------------------------------------------------------------
 # Cache-busting for /static/*.
 # vercel.json sets "Cache-Control: public, max-age=31536000, immutable" on
@@ -48,20 +41,16 @@ app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB max upload size
 # is preserved for assets that haven't changed, and busted for ones that have.
 # ---------------------------------------------------------------------------
 _STATIC_DIR = os.path.join(app.root_path, 'static')
-
 def _static_version(filename):
     try:
         return str(int(os.path.getmtime(os.path.join(_STATIC_DIR, filename))))
     except OSError:
         return "1"
-
 @app.context_processor
 def inject_asset_version():
     def versioned_static(filename):
         return url_for('static', filename=filename) + '?v=' + _static_version(filename)
     return dict(versioned_static=versioned_static)
-
-
 # Compress every HTML/CSS/JS/JSON response with gzip (falls back automatically
 # if the browser doesn't support it). This cuts payload size dramatically for
 # almost no CPU cost and helps a lot under concurrent load.
@@ -70,15 +59,12 @@ try:
     Compress(app)
 except ImportError:
     pass
-
 # Tell browsers to cache static files (images, css) for a year. Because the
 # upload routes already give files random uuid-based filenames, a changed
 # file gets a new URL automatically, so long caching here is safe and means
 # repeat visitors barely re-download anything.
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 60 * 60 * 24 * 365
-
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
 # ---------------------------------------------------------------------------
 # Supabase Connection
 # ---------------------------------------------------------------------------
@@ -87,24 +73,20 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 #   SUPABASE_SERVICE_KEY  -> Project Settings > API > service_role secret key
 # The service_role key is used because this is a trusted server-side backend;
 # never expose it in frontend/browser code.
-
 TABLE_QUERIES = "queries"
 TABLE_ORDERS = "place_orders"
 TABLE_TRASH = "trash"
 TABLE_ANNOUNCEMENTS = "announcements"
 TABLE_PROJECTS = "projects"
 TABLE_REPORT_LEADS = "report_leads"
-
 # Supabase Storage bucket that holds "Delivered Projects" photos. Must be
 # created once in the Supabase dashboard (Storage > New bucket > "project-images",
 # set Public = ON so the homepage can load the photos directly by URL).
 PROJECT_IMAGES_BUCKET = "project-images"
-
 # Contact number for the company (used for the "Chat on WhatsApp" button)
 COMPANY_WHATSAPP_NUMBER = "917297022722"
 COMPANY_SECOND_WHATSAPP_NUMBER = "917859968905"
 COMPANY_MAIL_ID = "avdevlab@gmail.com"
-
 # Service categories shown on the "Place Order" form. Visitors can also type
 # a custom category via "Other" if theirs isn't listed.
 SERVICE_CHOICES = [
@@ -113,8 +95,6 @@ SERVICE_CHOICES = [
     "ERP Software",
     "AI Agent",
 ]
-
-
 # ---------------------------------------------------------------------------
 # Tiny TTL cache for hot, read-heavy pages (homepage announcements, shop
 # products). These are read on nearly every visitor request but only ever
@@ -124,8 +104,6 @@ SERVICE_CHOICES = [
 # ---------------------------------------------------------------------------
 _cache_store = {}
 _cache_lock = threading.Lock()
-
-
 def cached(key, ttl_seconds, fetch_fn):
     now = time.time()
     with _cache_lock:
@@ -136,13 +114,9 @@ def cached(key, ttl_seconds, fetch_fn):
     with _cache_lock:
         _cache_store[key] = (now + ttl_seconds, value)
     return value
-
-
 def invalidate_cache(key):
     with _cache_lock:
         _cache_store.pop(key, None)
-
-
 def _with_alias(rows):
     """Supabase rows use 'id' (bigint). Existing templates were written against
     MongoDB's '_id' field, so we mirror it as a string here to keep every
@@ -151,12 +125,8 @@ def _with_alias(rows):
         if r and 'id' in r:
             r['_id'] = str(r['id'])
     return rows or []
-
-
 def _one_or_none(rows):
     return rows[0] if rows else None
-
-
 def _strip_row_id(row):
     """Remove identity/meta columns before re-inserting a row into another table."""
     if not row:
@@ -166,8 +136,6 @@ def _strip_row_id(row):
     row.pop('_id', None)
     row.pop('created_at', None)
     return row
-
-
 # ---------------------------------------------------------------------------
 # REPORT GENERATION PIPELINE
 # ---------------------------------------------------------------------------
@@ -201,8 +169,6 @@ def sync_lead_report(name, gmail, category, source):
         # The report pipeline must NEVER break the real query/order workflow,
         # so any failure here is only logged, never raised.
         print("[report pipeline] could not sync report_leads row:", e)
-
-
 def _resolve_category(form):
     """Read category_choice (+ optional new_category for 'Other') from the
     Place Order form, the same '+ Create New' pattern used for product
@@ -212,22 +178,17 @@ def _resolve_category(form):
     if category_choice == '__other__':
         return new_category
     return category_choice
-
-
 def count_rows(table, **filters):
     q = supabase.table(table).select("id", count="exact")
     for key, value in filters.items():
         q = q.eq(key, value)
     return q.execute().count or 0
-
-
 def get_admin_counts():
     # These 5 counts are independent, so run them concurrently on a small
     # thread pool instead of one-after-another - cuts this from ~5 sequential
     # network round-trips to ~1, which matters a lot when several admins/
     # pages are loading at once.
     from concurrent.futures import ThreadPoolExecutor
-
     jobs = {
         "orders_pending": lambda: count_rows(TABLE_ORDERS, status="Pending"),
         "trash": lambda: count_rows(TABLE_TRASH),
@@ -237,19 +198,42 @@ def get_admin_counts():
     with ThreadPoolExecutor(max_workers=4) as pool:
         futures = {key: pool.submit(fn) for key, fn in jobs.items()}
         return {key: f.result() for key, f in futures.items()}
-
-
+import traceback
+@app.errorhandler(500)
+@app.errorhandler(Exception)
+def handle_uncaught_error(e):
+    """Safety net: any exception that slips through a route (e.g. a Supabase
+    call failing because a table/bucket doesn't exist yet, or credentials are
+    wrong) used to bubble up as Vercel's raw 'Internal Server Error' page with
+    zero information. Now it gets logged (visible in Vercel's Function Logs)
+    and the admin is sent back with a clear flash message instead of a dead
+    end. Non-HTTP exceptions are treated as 500s; real HTTP errors (404, etc.)
+    are passed through unchanged."""
+    from werkzeug.exceptions import HTTPException
+    if isinstance(e, HTTPException):
+        return e
+    print("[UNCAUGHT ERROR]", repr(e))
+    traceback.print_exc()
+    try:
+        flash("Something went wrong on our end. Please try again — if this "
+              "keeps happening, check the Vercel function logs for details.", "danger")
+        # Prefer bouncing back to where the admin was, otherwise the admin home.
+        if request.referrer:
+            return redirect(request.referrer)
+        return redirect(url_for('admin'))
+    except Exception:
+        # If even the fallback redirect fails (e.g. not logged in / no
+        # request context quirk), give a minimal plain response instead of
+        # crashing again.
+        return Response("Something went wrong. Please try again.", status=500)
 def login_required(view_func):
     from functools import wraps
-
     @wraps(view_func)
     def wrapped(*args, **kwargs):
         if not session.get('logged_in'):
             return redirect(url_for('login'))
         return view_func(*args, **kwargs)
     return wrapped
-
-
 # ---------------------------------------------------------------------------
 # HOME PAGE + QUERY SYSTEM
 # ---------------------------------------------------------------------------
@@ -259,7 +243,6 @@ def index():
         name = request.form.get('name')
         gmail = (request.form.get('gmail') or '').strip()
         query_text = request.form.get('query')
-
         new_query = {
             "name": name,
             "gmail": gmail,
@@ -269,31 +252,22 @@ def index():
             "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
         }
         supabase.table(TABLE_QUERIES).insert(new_query).execute()
-
         # Report generation pipeline: copy just the report-relevant fields
         # into report_leads (deduped by Gmail). The original query row/
         # workflow above is already saved and unaffected by this.
         sync_lead_report(name, gmail, "General Query", "Query Form")
-
         flash("Query submitted successfully! 🚀", "success")
         return redirect(url_for('index'))
-
     def _fetch():
         resp = supabase.table(TABLE_ANNOUNCEMENTS).select("*").order("id", desc=True).limit(12).execute()
         return _with_alias(resp.data)
-
     announcements = cached("home_announcements", 30, _fetch)
-
     def _fetch_projects():
         resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).limit(24).execute()
         return _with_alias(resp.data)
-
     projects = cached("home_projects", 30, _fetch_projects)
-
     return render_template('index.html', whatsapp_number=COMPANY_WHATSAPP_NUMBER,second_whatsapp_number=COMPANY_SECOND_WHATSAPP_NUMBER,email = COMPANY_MAIL_ID, announcements=announcements,
                             projects=projects, service_choices=SERVICE_CHOICES)
-
-
 # ---------------------------------------------------------------------------
 # PLACE ORDER (project request form)
 # ---------------------------------------------------------------------------
@@ -304,9 +278,7 @@ def place_order():
     gmail = (request.form.get('gmail') or '').strip()
     special_instructions = request.form.get('special_instructions')
     category = _resolve_category(request.form)
-
     clean_number = ''.join(filter(str.isdigit, contact_number or ''))
-
     supabase.table(TABLE_ORDERS).insert({
         "name": name,
         "contact_number": clean_number,
@@ -316,16 +288,12 @@ def place_order():
         "status": "Pending",
         "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
     }).execute()
-
     # Report generation pipeline: copy just the report-relevant fields into
     # report_leads (deduped by Gmail). The original order row/workflow above
     # is already saved and unaffected by this.
     sync_lead_report(name, gmail, category or "Other", "Place Order")
-
     flash("Your project request has been submitted! We'll get back to you soon. 🚀", "success")
     return redirect(url_for('index') + '#placeOrderForm')
-
-
 # ---------------------------------------------------------------------------
 # LOGIN SYSTEM (admin only)
 # ---------------------------------------------------------------------------
@@ -338,22 +306,16 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
         if username == 'admin' and password == 'admin123':
             session['logged_in'] = True
             return redirect(url_for('admin'))
         else:
             flash("Invalid Credentials. Please try again.", "danger")
-
     return render_template('login.html')
-
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
     return redirect(url_for('login'))
-
-
 # ---------------------------------------------------------------------------
 # ADMIN - QUERY DASHBOARD
 # ---------------------------------------------------------------------------
@@ -361,36 +323,32 @@ def logout():
 @login_required
 def admin():
     search_q = request.args.get('q', '').strip()
-
     q = supabase.table(TABLE_QUERIES).select("*").order("id", desc=True)
     if search_q:
         q = q.ilike("name", f"%{search_q}%")
     all_queries = _with_alias(q.execute().data)
-
     stats = {
         "total": count_rows(TABLE_QUERIES),
         "pending": count_rows(TABLE_QUERIES, status="Pending"),
         "available": count_rows(TABLE_QUERIES, status="Available"),
         "non_available": count_rows(TABLE_QUERIES, status="Non-Available"),
     }
-
     return render_template('admin.html', queries=all_queries, stats=stats, counts=get_admin_counts(), search_q=search_q)
-
-
 @app.route('/update_status/<query_id>', methods=['POST'])
 @login_required
 def update_status(query_id):
     new_status = request.form.get('status')
     admin_message = request.form.get('admin_message')
-
-    supabase.table(TABLE_QUERIES).update({
-        "status": new_status,
-        "admin_message": admin_message
-    }).eq("id", int(query_id)).execute()
-
-    flash("Query updated successfully! ✅", "success")
+    try:
+        supabase.table(TABLE_QUERIES).update({
+            "status": new_status,
+            "admin_message": admin_message
+        }).eq("id", int(query_id)).execute()
+        flash("Query updated successfully! ✅", "success")
+    except Exception as e:
+        print("[update_status] failed:", repr(e))
+        flash(f"Error updating query: {e}", "danger")
     return redirect(url_for('admin'))
-
 @app.route('/delete_query/<int:query_id>', methods=['POST'])
 @login_required
 def delete_query(query_id):
@@ -399,9 +357,7 @@ def delete_query(query_id):
         flash("Query deleted successfully. 🗑️", "success")
     except Exception as e:
         flash(f"Error deleting query: {e}", "danger")
-
     return redirect(url_for('admin'))
-
 # ---------------------------------------------------------------------------
 # ANNOUNCEMENTS (circular cards shown on the homepage)
 # ---------------------------------------------------------------------------
@@ -410,8 +366,6 @@ ANNOUNCEMENT_ICONS = [
     'bi-megaphone-fill', 'bi-gift-fill', 'bi-percent', 'bi-stars',
     'bi-calendar-event-fill', 'bi-bell-fill', 'bi-tag-fill', 'bi-emoji-smile-fill'
 ]
-
-
 @app.route('/admin/announcements')
 @login_required
 def admin_announcements():
@@ -419,8 +373,6 @@ def admin_announcements():
     all_announcements = _with_alias(resp.data)
     return render_template('admin_announcements.html', announcements=all_announcements,
                             counts=get_admin_counts(), icon_choices=ANNOUNCEMENT_ICONS)
-
-
 @app.route('/admin/announcements/add', methods=['POST'])
 @login_required
 def admin_announcements_add():
@@ -430,38 +382,39 @@ def admin_announcements_add():
     color = request.form.get('color', '').strip()
     if color not in ANNOUNCEMENT_COLORS:
         color = 'amber'
-
     if not title:
         flash("Announcement title is required.", "danger")
         return redirect(url_for('admin_announcements'))
-
-    supabase.table(TABLE_ANNOUNCEMENTS).insert({
-        "title": title,
-        "message": message,
-        "icon": icon,
-        "color": color,
-        "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
-    }).execute()
+    try:
+        supabase.table(TABLE_ANNOUNCEMENTS).insert({
+            "title": title,
+            "message": message,
+            "icon": icon,
+            "color": color,
+            "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
+        }).execute()
+    except Exception as e:
+        print("[admin_announcements_add] failed:", repr(e))
+        flash(f"Couldn't post the announcement: {e}", "danger")
+        return redirect(url_for('admin_announcements'))
     invalidate_cache("home_announcements")
     flash("Announcement posted! 📢", "success")
     return redirect(url_for('admin_announcements'))
-
-
 @app.route('/admin/announcements/delete/<announcement_id>', methods=['POST'])
 @login_required
 def admin_announcements_delete(announcement_id):
-    supabase.table(TABLE_ANNOUNCEMENTS).delete().eq("id", int(announcement_id)).execute()
-    invalidate_cache("home_announcements")
-    flash("Announcement removed.", "success")
+    try:
+        supabase.table(TABLE_ANNOUNCEMENTS).delete().eq("id", int(announcement_id)).execute()
+        invalidate_cache("home_announcements")
+        flash("Announcement removed.", "success")
+    except Exception as e:
+        print("[admin_announcements_delete] failed:", repr(e))
+        flash(f"Couldn't remove the announcement: {e}", "danger")
     return redirect(url_for('admin_announcements'))
-
-
 # ---------------------------------------------------------------------------
 # DELIVERED PROJECTS (admin-curated "Delivered Projects" homepage section)
 # ---------------------------------------------------------------------------
 ALLOWED_IMAGE_EXT = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
-
-
 def _upload_project_images(files):
     """Uploads each file to Supabase Storage under PROJECT_IMAGES_BUCKET and
     returns a list of public URLs. Files with an unsupported extension are
@@ -484,51 +437,50 @@ def _upload_project_images(files):
         except Exception as e:
             print("[project image upload] failed:", e)
     return urls
-
-
 @app.route('/admin/projects')
 @login_required
 def admin_projects():
     resp = supabase.table(TABLE_PROJECTS).select("*").order("id", desc=True).execute()
     all_projects = _with_alias(resp.data)
     return render_template('admin_projects.html', projects=all_projects, counts=get_admin_counts())
-
-
 @app.route('/admin/projects/add', methods=['POST'])
 @login_required
 def admin_projects_add():
     title = request.form.get('title', '').strip()
     description = request.form.get('description', '').strip()
     link = request.form.get('link', '').strip()
-
     if not title:
         flash("Project title is required.", "danger")
         return redirect(url_for('admin_projects'))
-
     image_urls = _upload_project_images(request.files.getlist('photos'))
-
-    supabase.table(TABLE_PROJECTS).insert({
-        "title": title,
-        "description": description,
-        "link": link,
-        "image_urls": image_urls,
-        "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
-    }).execute()
+    try:
+        supabase.table(TABLE_PROJECTS).insert({
+            "title": title,
+            "description": description,
+            "link": link,
+            "image_urls": image_urls,
+            "date": datetime.now().strftime("%d %b %Y, %I:%M %p")
+        }).execute()
+    except Exception as e:
+        print("[admin_projects_add] insert failed:", repr(e))
+        flash("Couldn't save the project — the database rejected the request. "
+              "Check that the 'projects' table exists in Supabase and that "
+              "SUPABASE_SERVICE_KEY is set correctly (see Vercel logs for the exact error).", "danger")
+        return redirect(url_for('admin_projects'))
     invalidate_cache("home_projects")
     flash("Project added to Delivered Projects! 🚀", "success")
     return redirect(url_for('admin_projects'))
-
-
 @app.route('/admin/projects/delete/<project_id>', methods=['POST'])
 @login_required
 def admin_projects_delete(project_id):
-    supabase.table(TABLE_PROJECTS).delete().eq("id", int(project_id)).execute()
-    invalidate_cache("home_projects")
-    flash("Project removed.", "success")
+    try:
+        supabase.table(TABLE_PROJECTS).delete().eq("id", int(project_id)).execute()
+        invalidate_cache("home_projects")
+        flash("Project removed.", "success")
+    except Exception as e:
+        print("[admin_projects_delete] failed:", repr(e))
+        flash(f"Couldn't remove the project: {e}", "danger")
     return redirect(url_for('admin_projects'))
-
-
-
 # ---- Admin: Orders (submitted carts) ----
 @app.route('/admin/orders')
 @login_required
@@ -536,31 +488,33 @@ def admin_orders():
     resp = supabase.table(TABLE_ORDERS).select("*").order("id", desc=True).execute()
     all_orders = _with_alias(resp.data)
     return render_template('admin_orders.html', orders=all_orders, counts=get_admin_counts())
-
-
 @app.route('/admin/orders/done/<order_id>', methods=['POST'])
 @login_required
 def admin_orders_done(order_id):
-    supabase.table(TABLE_ORDERS).update({"status": "Done"}).eq("id", int(order_id)).execute()
-    flash("Order marked as done. ✅", "success")
+    try:
+        supabase.table(TABLE_ORDERS).update({"status": "Done"}).eq("id", int(order_id)).execute()
+        flash("Order marked as done. ✅", "success")
+    except Exception as e:
+        print("[admin_orders_done] failed:", repr(e))
+        flash(f"Couldn't update the order: {e}", "danger")
     return redirect(url_for('admin_orders'))
-
-
 @app.route('/admin/orders/remove/<order_id>', methods=['POST'])
 @login_required
 def admin_orders_remove(order_id):
-    resp = supabase.table(TABLE_ORDERS).select("*").eq("id", int(order_id)).execute()
-    order = _one_or_none(resp.data)
-    if order:
-        trash_row = _strip_row_id(order)
-        trash_row['original_order_id'] = order['id']
-        trash_row['deleted_date'] = datetime.now().strftime("%d %b %Y, %I:%M %p")
-        supabase.table(TABLE_TRASH).insert(trash_row).execute()
-        supabase.table(TABLE_ORDERS).delete().eq("id", int(order_id)).execute()
-        flash("Order moved to Trash.", "success")
+    try:
+        resp = supabase.table(TABLE_ORDERS).select("*").eq("id", int(order_id)).execute()
+        order = _one_or_none(resp.data)
+        if order:
+            trash_row = _strip_row_id(order)
+            trash_row['original_order_id'] = order['id']
+            trash_row['deleted_date'] = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            supabase.table(TABLE_TRASH).insert(trash_row).execute()
+            supabase.table(TABLE_ORDERS).delete().eq("id", int(order_id)).execute()
+            flash("Order moved to Trash.", "success")
+    except Exception as e:
+        print("[admin_orders_remove] failed:", repr(e))
+        flash(f"Couldn't move the order to trash: {e}", "danger")
     return redirect(url_for('admin_orders'))
-
-
 # ---- Admin: Trash ----
 @app.route('/admin/trash')
 @login_required
@@ -568,32 +522,34 @@ def admin_trash():
     resp = supabase.table(TABLE_TRASH).select("*").order("id", desc=True).execute()
     trashed = _with_alias(resp.data)
     return render_template('admin_trash.html', trashed=trashed, counts=get_admin_counts())
-
-
 @app.route('/admin/trash/restore/<order_id>', methods=['POST'])
 @login_required
 def admin_trash_restore(order_id):
-    resp = supabase.table(TABLE_TRASH).select("*").eq("id", int(order_id)).execute()
-    order = _one_or_none(resp.data)
-    if order:
-        restored_row = _strip_row_id(order)
-        restored_row.pop('deleted_date', None)
-        restored_row.pop('original_order_id', None)
-        restored_row['status'] = 'Pending'
-        supabase.table(TABLE_ORDERS).insert(restored_row).execute()
-        supabase.table(TABLE_TRASH).delete().eq("id", int(order_id)).execute()
-        flash("Order restored.", "success")
+    try:
+        resp = supabase.table(TABLE_TRASH).select("*").eq("id", int(order_id)).execute()
+        order = _one_or_none(resp.data)
+        if order:
+            restored_row = _strip_row_id(order)
+            restored_row.pop('deleted_date', None)
+            restored_row.pop('original_order_id', None)
+            restored_row['status'] = 'Pending'
+            supabase.table(TABLE_ORDERS).insert(restored_row).execute()
+            supabase.table(TABLE_TRASH).delete().eq("id", int(order_id)).execute()
+            flash("Order restored.", "success")
+    except Exception as e:
+        print("[admin_trash_restore] failed:", repr(e))
+        flash(f"Couldn't restore the order: {e}", "danger")
     return redirect(url_for('admin_trash'))
-
-
 @app.route('/admin/trash/clear', methods=['POST'])
 @login_required
 def admin_trash_clear():
-    supabase.table(TABLE_TRASH).delete().gt("id", 0).execute()
-    flash("Trash bin cleared.", "success")
+    try:
+        supabase.table(TABLE_TRASH).delete().gt("id", 0).execute()
+        flash("Trash bin cleared.", "success")
+    except Exception as e:
+        print("[admin_trash_clear] failed:", repr(e))
+        flash(f"Couldn't clear the trash bin: {e}", "danger")
     return redirect(url_for('admin_trash'))
-
-
 # ---------------------------------------------------------------------------
 # ADMIN - REPORT GENERATION (Excel)
 # ---------------------------------------------------------------------------
@@ -604,10 +560,8 @@ def admin_trash_clear():
 def admin_reports():
     resp = supabase.table(TABLE_REPORT_LEADS).select("*").execute()
     rows = resp.data or []
-
     categories = sorted({r['category'] for r in rows if r.get('category')})
     sources = sorted({r['source'] for r in rows if r.get('source')})
-
     return render_template(
         'admin_reports.html',
         counts=get_admin_counts(),
@@ -615,14 +569,11 @@ def admin_reports():
         categories=categories,
         sources=sources,
     )
-
-
 @app.route('/admin/reports/export')
 @login_required
 def admin_reports_export():
     filter_type = request.args.get('filter_type', 'all')
     filter_value = request.args.get('filter_value', '').strip()
-
     q = supabase.table(TABLE_REPORT_LEADS).select("*")
     sheet_title = "All Leads"
     if filter_type == 'category' and filter_value:
@@ -631,17 +582,13 @@ def admin_reports_export():
     elif filter_type == 'source' and filter_value:
         q = q.eq('source', filter_value)
         sheet_title = f"Source - {filter_value}"
-
     rows = q.order('name').execute().data or []
-
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
     from openpyxl.utils import get_column_letter
-
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_title[:31] or "Lead Report"  # Excel sheet-name limit
-
     headers = ["Sr No.", "Name", "Gmail", "Category", "Source"]
     ws.append(headers)
     header_fill = PatternFill(start_color="1F2937", end_color="1F2937", fill_type="solid")
@@ -650,7 +597,6 @@ def admin_reports_export():
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = header_fill
         cell.alignment = Alignment(horizontal="center")
-
     for i, r in enumerate(rows, start=1):
         ws.append([
             i,
@@ -659,29 +605,23 @@ def admin_reports_export():
             r.get('category') or '',
             r.get('source') or '',
         ])
-
     for idx, width in enumerate([8, 26, 30, 24, 16], start=1):
         ws.column_dimensions[get_column_letter(idx)].width = width
     ws.freeze_panes = "A2"
-
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
-
     filename_bits = ["lead_report"]
     if filter_type != 'all' and filter_value:
         filename_bits.append(filter_type)
         filename_bits.append(secure_filename(filter_value).lower() or "value")
     filename_bits.append(datetime.now().strftime("%Y%m%d_%H%M"))
     filename = "_".join(filename_bits) + ".xlsx"
-
     return Response(
         buffer.getvalue(),
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
-
-
 # ---------------------------------------------------------------------------
 # QR CODE
 # ---------------------------------------------------------------------------
@@ -697,13 +637,9 @@ def generate_qr():
     qr.add_data(website_url)
     qr.make(fit=True)
     img = qr.make_image(fill='black', back_color='white')
-
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     qr_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-
     return render_template('qr_code.html', qr_image=qr_base64)
-
-
 if __name__ == '__main__':
     app.run(debug=True)
