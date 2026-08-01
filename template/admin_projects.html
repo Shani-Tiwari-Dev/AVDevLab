@@ -29,7 +29,7 @@
         <!-- New project form -->
         <div class="glass-card p-4 mb-4">
             <h6 class="fw-bold mb-3">Add a Delivered Project</h6>
-            <form action="{{ url_for('admin_projects_add') }}" method="POST" enctype="multipart/form-data">
+            <form id="projectForm" action="{{ url_for('admin_projects_add') }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Project Title *</label>
@@ -45,10 +45,13 @@
                     <textarea name="description" class="form-control" rows="2" placeholder="A short line about what was built..."></textarea>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Photos (you can select multiple)</label>
-                    <input type="file" name="photos" class="form-control" accept="image/*" multiple>
+                    <label class="form-label">Photos (you can select multiple — iPhone HEIC photos are supported too)</label>
+                    <input type="file" id="photoInput" class="form-control" accept="image/*,.heic,.heif" multiple>
+                    <div id="photoCountLabel" class="form-text mb-2"></div>
+                    <div id="photoPreview" class="photo-preview-grid" style="display:none;"></div>
                 </div>
-                <button type="submit" class="btn-submit" style="width:auto; padding: 10px 28px;"><i class="bi bi-upload me-1"></i> Add Project</button>
+                <div id="uploadStatus" class="form-text mb-2" style="display:none;"></div>
+                <button type="submit" id="projectSubmitBtn" class="btn-submit" style="width:auto; padding: 10px 28px;"><i class="bi bi-upload me-1"></i> Add Project</button>
             </form>
         </div>
 
@@ -79,5 +82,145 @@
         </div>
         {% endfor %}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js" defer></script>
+    <script>
+    (function () {
+        var form = document.getElementById('projectForm');
+        var photoInput = document.getElementById('photoInput');
+        var previewWrap = document.getElementById('photoPreview');
+        var countLabel = document.getElementById('photoCountLabel');
+        var statusEl = document.getElementById('uploadStatus');
+        var submitBtn = document.getElementById('projectSubmitBtn');
+        var selectedFiles = [];
+
+        function isHeic(file) {
+            return /image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
+        }
+
+        function renderPreview() {
+            previewWrap.innerHTML = '';
+            previewWrap.style.display = selectedFiles.length ? 'flex' : 'none';
+            countLabel.textContent = selectedFiles.length
+                ? selectedFiles.length + (selectedFiles.length === 1 ? ' photo selected' : ' photos selected')
+                : '';
+            selectedFiles.forEach(function (file, idx) {
+                var item = document.createElement('div');
+                item.className = 'photo-preview-item';
+                var img = document.createElement('img');
+                // getObjectURL works for HEIC too in most browsers just for a
+                // generic file icon fallback isn't guaranteed, so wrap in try.
+                try { img.src = URL.createObjectURL(file); } catch (e) {}
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'photo-preview-remove';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.setAttribute('aria-label', 'Remove photo');
+                removeBtn.onclick = function () { selectedFiles.splice(idx, 1); renderPreview(); };
+                item.appendChild(img);
+                item.appendChild(removeBtn);
+                previewWrap.appendChild(item);
+            });
+        }
+
+        photoInput.addEventListener('change', function () {
+            selectedFiles = selectedFiles.concat(Array.from(photoInput.files));
+            photoInput.value = ''; // allows re-selecting the same file again later
+            renderPreview();
+        });
+
+        function compressToJpeg(blob, maxDim, quality) {
+            return new Promise(function (resolve) {
+                var url = URL.createObjectURL(blob);
+                var img = new Image();
+                img.onload = function () {
+                    var width = img.width, height = img.height;
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+                        else { width = Math.round(width * maxDim / height); height = maxDim; }
+                    }
+                    var canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    canvas.toBlob(function (outBlob) {
+                        URL.revokeObjectURL(url);
+                        resolve(outBlob || blob);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = function () { URL.revokeObjectURL(url); resolve(blob); };
+                img.src = url;
+            });
+        }
+
+        // Converts HEIC/HEIF (the default format for iPhone photos) to JPEG,
+        // then resizes/compresses every photo to a sane size in the browser.
+        // This is what actually fixes "multi-photo upload only takes one":
+        // full-res phone photos add up fast, and Vercel's serverless
+        // functions reject request bodies over ~4.5MB regardless of Flask's
+        // own upload limit — so large multi-photo submissions were silently
+        // getting cut down to whatever fit. Shrinking each photo to ~1600px
+        // JPEG keeps a whole batch comfortably under that ceiling.
+        async function processFile(file) {
+            var working = file;
+            if (isHeic(file) && window.heic2any) {
+                try {
+                    var converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+                    working = Array.isArray(converted) ? converted[0] : converted;
+                } catch (e) {
+                    console.warn('HEIC conversion failed for', file.name, e);
+                    return file; // server now also accepts raw .heic as a fallback
+                }
+            }
+            try {
+                var compressed = await compressToJpeg(working, 1600, 0.82);
+                var newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+                return new File([compressed], newName, { type: 'image/jpeg' });
+            } catch (e) {
+                console.warn('compression failed for', file.name, e);
+                return file;
+            }
+        }
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            var originalBtnHtml = submitBtn.innerHTML;
+            var formData = new FormData();
+            formData.append('title', form.title.value);
+            formData.append('link', form.link.value);
+            formData.append('description', form.description.value);
+
+            if (selectedFiles.length) {
+                statusEl.style.display = 'block';
+                for (var i = 0; i < selectedFiles.length; i++) {
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Preparing photo ' + (i + 1) + '/' + selectedFiles.length + '…';
+                    var processed = await processFile(selectedFiles[i]);
+                    formData.append('photos', processed, processed.name);
+                }
+            }
+            statusEl.textContent = 'Saving project…';
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving…';
+
+            try {
+                var resp = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                var data = await resp.json();
+                statusEl.textContent = data.message;
+                statusEl.className = 'form-text mb-2 fw-bold ' + (data.category === 'danger' ? 'text-danger' : data.category === 'warning' ? 'text-warning' : 'text-success');
+                setTimeout(function () { window.location.reload(); }, 1100);
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+                statusEl.style.display = 'block';
+                statusEl.className = 'form-text mb-2 fw-bold text-danger';
+                statusEl.textContent = 'Upload failed — check your connection and try again.';
+            }
+        });
+    })();
+    </script>
 </body>
 </html>

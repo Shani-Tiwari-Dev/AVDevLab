@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, Response, jsonify
 from supabase import create_client, Client
 import qrcode
 import io
@@ -414,18 +414,23 @@ def admin_announcements_delete(announcement_id):
 # ---------------------------------------------------------------------------
 # DELIVERED PROJECTS (admin-curated "Delivered Projects" homepage section)
 # ---------------------------------------------------------------------------
-ALLOWED_IMAGE_EXT = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
+ALLOWED_IMAGE_EXT = {'.png', '.jpg', '.jpeg', '.webp', '.gif', '.heic', '.heif'}
 def _upload_project_images(files):
     """Uploads each file to Supabase Storage under PROJECT_IMAGES_BUCKET and
-    returns a list of public URLs. Files with an unsupported extension are
-    silently skipped rather than failing the whole submission."""
+    returns (urls, skipped, failed):
+      - urls: public URLs of everything that uploaded successfully
+      - skipped: filenames rejected for an unsupported extension
+      - failed: filenames that had a supported extension but errored during upload
+    Nothing is silently dropped anymore — admin_projects_add() reports both
+    lists back to the admin instead of only printing them to server logs."""
     import uuid
-    urls = []
+    urls, skipped, failed = [], [], []
     for f in files:
         if not f or not f.filename:
             continue
         ext = os.path.splitext(f.filename)[1].lower()
         if ext not in ALLOWED_IMAGE_EXT:
+            skipped.append(f.filename)
             continue
         path = f"{uuid.uuid4().hex}{ext}"
         content_type = f.mimetype or 'application/octet-stream'
@@ -435,8 +440,9 @@ def _upload_project_images(files):
             )
             urls.append(supabase.storage.from_(PROJECT_IMAGES_BUCKET).get_public_url(path))
         except Exception as e:
-            print("[project image upload] failed:", e)
-    return urls
+            print("[project image upload] failed:", f.filename, e)
+            failed.append(f.filename)
+    return urls, skipped, failed
 @app.route('/admin/projects')
 @login_required
 def admin_projects():
@@ -446,13 +452,19 @@ def admin_projects():
 @app.route('/admin/projects/add', methods=['POST'])
 @login_required
 def admin_projects_add():
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    def _respond(message, category):
+        if is_ajax:
+            return jsonify({"message": message, "category": category})
+        flash(message, category)
+        return redirect(url_for('admin_projects'))
+
     title = request.form.get('title', '').strip()
     description = request.form.get('description', '').strip()
     link = request.form.get('link', '').strip()
     if not title:
-        flash("Project title is required.", "danger")
-        return redirect(url_for('admin_projects'))
-    image_urls = _upload_project_images(request.files.getlist('photos'))
+        return _respond("Project title is required.", "danger")
+    image_urls, skipped, failed = _upload_project_images(request.files.getlist('photos'))
     try:
         supabase.table(TABLE_PROJECTS).insert({
             "title": title,
@@ -463,13 +475,21 @@ def admin_projects_add():
         }).execute()
     except Exception as e:
         print("[admin_projects_add] insert failed:", repr(e))
-        flash("Couldn't save the project — the database rejected the request. "
-              "Check that the 'projects' table exists in Supabase and that "
-              "SUPABASE_SERVICE_KEY is set correctly (see Vercel logs for the exact error).", "danger")
-        return redirect(url_for('admin_projects'))
+        return _respond(
+            "Couldn't save the project — the database rejected the request. "
+            "Check that the 'projects' table exists in Supabase and that "
+            "SUPABASE_SERVICE_KEY is set correctly (see Vercel logs for the exact error).",
+            "danger",
+        )
     invalidate_cache("home_projects")
-    flash("Project added to Delivered Projects! 🚀", "success")
-    return redirect(url_for('admin_projects'))
+    if skipped or failed:
+        bits = []
+        if skipped:
+            bits.append(f"{len(skipped)} skipped (unsupported format: {', '.join(skipped)})")
+        if failed:
+            bits.append(f"{len(failed)} failed to upload ({', '.join(failed)}) — the file may be too large or the request timed out; try again with fewer/smaller photos")
+        return _respond(f"Project added with {len(image_urls)} photo(s). " + "; ".join(bits) + ".", "warning")
+    return _respond("Project added to Delivered Projects! 🚀", "success")
 @app.route('/admin/projects/delete/<project_id>', methods=['POST'])
 @login_required
 def admin_projects_delete(project_id):
